@@ -9,7 +9,7 @@ a set of small inter-dependent profiles.
 Modularization is achieved with two features provided by this extension:
 
  * support for dependencies between different profiles in maven build.
- * a way to activate profiles provided by parent pom from current pom.xml.
+ * a way to activate profiles provided by parent pom from current pom.
 
 This extension can be observed with maven-help-plugin.
 
@@ -149,7 +149,7 @@ on profile from parent pom.
 Configuring profiles from pom.xml
 ---------------------------------
 
-You can declare a set of interdependent profiles in your parent pom.xml
+You can declare a set of interdependent profiles in your parent pom
 and activate them in inherited pom. Special `activateparentprofiles` property is
 used for it.
 
@@ -225,7 +225,40 @@ Installation
 Maven 3.3.1 allows core-dependencies to be specified in `extensions.xml` file.
 See [this blog post](http://takari.io/2015/03/19/core-extensions.html).
 
-Here is `.mvn/extensions.xml`
+Easiest way is to use
+[coreext-maven-plugin](https://github.com/sviperll/ozymandias/tree/master/coreext-maven-plugin),
+like this:
+
+````xml
+            <plugin>
+                <groupId>com.github.sviperll</groupId>
+                <artifactId>coreext-maven-plugin</artifactId>
+                <version>0.6</version>
+                <configuration>
+                    <extensions combine.children="append">
+                        <!-- ... -->
+                        <extension>
+                            <groupId>com.github.sviperll</groupId>
+                            <artifactId>maven-profiledep-extension</artifactId>
+                            <version>${project.version}</version>
+                        </extension>
+                        <!-- ... -->
+                    </extensions>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>check-coreext</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+````
+
+coreext-plugin will modify `.mvn/extensions.xml` as required.
+
+If you wish you can manually write `.mvn/extensions.xml` file like this:
 
 ````xml
 <?xml version="1.0" encoding="UTF-8"?>

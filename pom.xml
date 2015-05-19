@@ -22,6 +22,7 @@
         <module>maven-profiledep-extension</module>
         <module>mustache-maven-plugin</module>
         <module>versioning-maven-plugin</module>
+        <module>coreext-maven-plugin</module>
     </modules>
     <developers>
         <developer>

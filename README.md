@@ -25,6 +25,12 @@ Child projects
 
    Tool (maven core-extension) used to modularize build by spliting build configuration into set of inter-dependent profiles.
 
+ * [coreext-maven-plugin](https://github.com/sviperll/ozymandias/tree/master/coreext-maven-plugin)
+
+   Manages `.mvn/extensions.xml` file introduced in maven 3.3.1.
+   Checks if all required core maven extensions are installed and have required
+   version numbers.
+
 License
 -------
 
