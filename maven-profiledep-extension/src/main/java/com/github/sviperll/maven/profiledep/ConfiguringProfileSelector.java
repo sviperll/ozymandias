@@ -13,6 +13,7 @@ import org.apache.maven.model.profile.ProfileActivationContext;
 import org.apache.maven.model.profile.ProfileSelector;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.codehaus.plexus.logging.Logger;
 
 /**
  *
@@ -24,6 +25,9 @@ public class ConfiguringProfileSelector implements ProfileSelector {
     private List<ProfileSelector> profileSelectors;
     private ProfileSelector configuredProfileSelector;
 
+    @Requirement
+    private Logger logger;
+
     private void init() {
         if (configuredProfileSelector == null) {
             ProfileSelector defaultProfileSelector = null;
@@ -32,7 +36,7 @@ public class ConfiguringProfileSelector implements ProfileSelector {
                     defaultProfileSelector = profileSelector;
                 }
             }
-            configuredProfileSelector = new ActivatingProfileSelector(new DependenciesProfileSelector(defaultProfileSelector));
+            configuredProfileSelector = new ContextualProfileSelector(logger, new DependenciesProfileSelector(logger, defaultProfileSelector));
         }
     }
 

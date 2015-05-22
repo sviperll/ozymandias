@@ -17,17 +17,20 @@ import org.apache.maven.model.building.ModelProblemCollector;
 import org.apache.maven.model.profile.DefaultProfileActivationContext;
 import org.apache.maven.model.profile.ProfileActivationContext;
 import org.apache.maven.model.profile.ProfileSelector;
+import org.codehaus.plexus.logging.Logger;
 
 /**
  *
  * @author vir
  */
 public class ActivatingProfileSelector implements ProfileSelector {
+    private final Logger logger;
     private final ProfileSelector defaultProfileSelector;
     private final Set<String> additionalProfileIDs = new TreeSet<String>();
     private final Set<String> additionallyExcludedProfileIDs = new TreeSet<String>();
 
-    ActivatingProfileSelector(DependenciesProfileSelector defaultProfileSelector) {
+    ActivatingProfileSelector(Logger logger, ProfileSelector defaultProfileSelector) {
+        this.logger = logger;
         this.defaultProfileSelector = defaultProfileSelector;
     }
 

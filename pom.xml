@@ -23,6 +23,7 @@
         <module>mustache-maven-plugin</module>
         <module>versioning-maven-plugin</module>
         <module>coreext-maven-plugin</module>
+        <module>bin-with-dependencies</module>
     </modules>
     <developers>
         <developer>

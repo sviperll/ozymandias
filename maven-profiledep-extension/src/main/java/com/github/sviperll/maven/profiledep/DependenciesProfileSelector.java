@@ -14,15 +14,18 @@ import org.apache.maven.model.building.ModelProblemCollector;
 import org.apache.maven.model.building.ModelProblemCollectorRequest;
 import org.apache.maven.model.profile.ProfileActivationContext;
 import org.apache.maven.model.profile.ProfileSelector;
+import org.codehaus.plexus.logging.Logger;
 
 /**
  *
  * @author vir
  */
 public class DependenciesProfileSelector implements ProfileSelector {
+    private final Logger logger;
     private final ProfileSelector defaultProfileSelector;
 
-    DependenciesProfileSelector(ProfileSelector defaultProfileSelector) {
+    DependenciesProfileSelector(Logger logger, ProfileSelector defaultProfileSelector) {
+        this.logger = logger;
         this.defaultProfileSelector = defaultProfileSelector;
     }
 
