@@ -7,7 +7,7 @@
     </parent>
     <groupId>com.github.sviperll</groupId>
     <artifactId>ozymandias</artifactId>
-    <version>0.6</version>
+    <version>0.6-successor-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>ozymandias</name>
     <description>Collection of maven extensions, plugins and generally usefull artifacts</description>

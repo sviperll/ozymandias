@@ -3,11 +3,11 @@
     <parent>
         <groupId>com.github.sviperll</groupId>
         <artifactId>ozymandias</artifactId>
-        <version>0.6</version>
+        <version>0.6-successor-SNAPSHOT</version>
     </parent>
     <groupId>com.github.sviperll</groupId>
     <artifactId>mustache-maven-plugin</artifactId>
-    <version>0.6</version>
+    <version>0.6-successor-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
     <name>mustache-maven-plugin</name>
     <description>Render mustache templates during the build</description>
