@@ -38,13 +38,6 @@
         <url>https://github.com/sviperll/ozymandias</url>
         <tag>HEAD</tag>
     </scm>
-    <distributionManagement>
-        <site>
-            <id>github</id>
-            <name>GitHub Pages</name>
-            <url>github:http://sviperll.github.io/ozymandias/</url>
-        </site>
-    </distributionManagement>
     <licenses>
         <license>
             <name>The BSD 3-Clause License</name>
