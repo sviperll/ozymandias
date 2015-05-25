@@ -9,7 +9,6 @@ import com.github.sviperll.maven.profiledep.util.TreeBuilder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -103,8 +102,10 @@ class ProfileIDResolver {
         TreeBuilder<String> resolutionTreeBuilder = TreeBuilder.createInstance(".");
         resolutionTreeBuilder.beginSubtree("Can't resolve " + profileID);
         for (Profile profile : candidates) {
+            DependencyResolution resolution = resolutonFactory.createDependencyResolution();
             try {
-                return resolutonFactory.createDependencyResolution().addAll(Collections.singletonList(profile));
+                resolution.activate(Collections.singletonList(profile));
+                return resolution.resolve();
             } catch (ResolutionValidationException ex) {
                 resolutionTreeBuilder.subtree(" to " + profile.getId(), ex.tree().children());
             }

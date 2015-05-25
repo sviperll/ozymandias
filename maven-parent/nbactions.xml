@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>CUSTOM-coreext:install</actionName>
+            <displayName>coreext:install</displayName>
+            <recursive>false</recursive>
+            <goals>
+                <goal>coreext:install</goal>
+            </goals>
+        </action>
+    </actions>

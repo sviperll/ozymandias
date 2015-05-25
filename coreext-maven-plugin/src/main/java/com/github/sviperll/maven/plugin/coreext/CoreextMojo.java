@@ -3,7 +3,7 @@
  */
 package com.github.sviperll.maven.plugin.coreext;
 
-import edu.emory.mathcs.backport.java.util.Collections;
+import java.util.Collections;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;

@@ -17,6 +17,7 @@ import org.apache.maven.model.Profile;
  * @author vir
  */
 class DependencyResolutionValidator {
+    private final static Profile EXPLICIT_DEMAND = new Profile();
     private final Map<String, Set<Profile>> activeProfileIDs = new TreeMap<String, Set<Profile>>();
     private final Map<String, Set<Profile>> forbiddenProfileIDs = new TreeMap<String, Set<Profile>>();
 
@@ -27,6 +28,10 @@ class DependencyResolutionValidator {
     void provide(String profileID, Profile provider) {
         Set<Profile> providedBy = providingProfilesFor(profileID);
         providedBy.add(provider);
+    }
+
+    void forbidExplicitly(String profileID) {
+        forbid(profileID, EXPLICIT_DEMAND);
     }
 
     void forbid(String conflictingProfileID, Profile profile) {
@@ -87,7 +92,7 @@ class DependencyResolutionValidator {
             isError = true;
             resulutionTreeBuilder.beginSubtree("more than one profile provides it");
             for (Profile profile : providedBy) {
-                resulutionTreeBuilder.node(profile.getId());
+                resulutionTreeBuilder.node(profileID(profile));
             }
             resulutionTreeBuilder.endSubtree();
         }
@@ -96,12 +101,18 @@ class DependencyResolutionValidator {
             isError = true;
             resulutionTreeBuilder.beginSubtree("it conflicts with some profiles");
             for (Profile profile : forbiddenBy) {
-                resulutionTreeBuilder.node(profile.getId());
+                resulutionTreeBuilder.node(profileID(profile));
             }
         }
         if (isError) {
             throw new ResolutionValidationException(resulutionTreeBuilder.build());
         }
     }
-    
+
+    public String profileID(Profile profile) {
+        if (profile == EXPLICIT_DEMAND)
+            return "<explicit demand>";
+        else
+            return profile.getId() + ":" + profile.getLocation("").getSource().getModelId();
+    }
 }

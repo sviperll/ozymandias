@@ -29,41 +29,12 @@
  */
 package com.github.sviperll.maven.profiledep;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.apache.maven.model.Profile;
-import org.apache.maven.model.building.ModelProblemCollector;
-import org.apache.maven.model.profile.ProfileActivationContext;
 import org.apache.maven.model.profile.ProfileSelector;
-import org.codehaus.plexus.logging.Logger;
 
 /**
  *
  * @author vir
  */
-public class ContextualProfileSelector implements ProfileSelector {
-    /* HACK:
-     * Each ModelProblemCollector specifies single chain of profile resolution from child to parent, up to root pom.
-     * Each chain should be resolved individually, so we keep a map to hold each chain state.
-     */
-    private final Map<ProfileActivationContext, ProfileSelector> selectors = new HashMap<ProfileActivationContext, ProfileSelector>();
-    private final ProfileSelectorFactory factory;
-    private final Logger logger;
-
-    ContextualProfileSelector(Logger logger, ProfileSelectorFactory factory) {
-        this.logger = logger;
-        this.factory = factory;
-    }
-
-    @Override
-    public List<Profile> getActiveProfiles(Collection<Profile> profiles, ProfileActivationContext context, ModelProblemCollector problems) {
-        ProfileSelector selector = selectors.get(context);
-        if (selector == null) {
-            selector = factory.createProfileSelector();
-            selectors.put(context, selector);
-        }
-        return selector.getActiveProfiles(profiles, context, problems);
-    }
+public interface ProfileSelectorFactory {
+    ProfileSelector createProfileSelector();
 }

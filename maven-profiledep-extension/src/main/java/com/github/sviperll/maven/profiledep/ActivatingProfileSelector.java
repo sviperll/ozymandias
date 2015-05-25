@@ -88,4 +88,19 @@ public class ActivatingProfileSelector implements ProfileSelector {
         result.setInactiveProfileIds(inactiveProfileIds);
         return result;
     }
+
+    static class Factory implements ProfileSelectorFactory {
+        private final Logger logger;
+        private final ProfileSelector profileSelector;
+
+        public Factory(Logger logger, ProfileSelector profileSelector) {
+            this.logger = logger;
+            this.profileSelector = profileSelector;
+        }
+
+        @Override
+        public ProfileSelector createProfileSelector() {
+            return new ActivatingProfileSelector(logger, profileSelector);
+        }
+    }
 }

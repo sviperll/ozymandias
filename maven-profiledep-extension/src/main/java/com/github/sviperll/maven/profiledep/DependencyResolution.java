@@ -13,34 +13,45 @@ import org.apache.maven.model.Profile;
  *
  * @author vir
  */
-class DependencyResolution {
-    static DependencyResolution resolve(Collection<Profile> availableProfiles, List<Profile> activatedProfiles, Collection<String> unresolvedProfileIDs) throws ResolutionValidationException {
-        DependencyResolution resolution = new DependencyResolution(availableProfiles);
-        resolution.declareUnresolved(unresolvedProfileIDs);
-        return resolution.addAll(activatedProfiles);
-    }
-
+class DependencyResolution implements Cloneable {
     private final ProfileIDResolver idResolver;
     private final DependencyResolutionValidator validator = new DependencyResolutionValidator();
     private final ProfileCollector collector = new ProfileCollector();
 
-    private DependencyResolution(Collection<Profile> availableProfiles) {
+    DependencyResolution(Collection<Profile> availableProfiles) {
         this.idResolver = new ProfileIDResolver(availableProfiles);
     }
 
-    DependencyResolution addAll(List<Profile> profiles) throws ResolutionValidationException {
-        for (;;) {
-            for (Profile profile : profiles) {
-                activate(profile);
-            }
-            validator.validate();
-            for (Profile profile : profiles) {
-                collectDependencies(profile);
-            }
-            validator.validate();
-            profiles = idResolver.resolveUnambigous();
-            if (profiles.isEmpty())
-                break;
+    List<Profile> activeProfiles() {
+        return collector.activeProfiles();
+    }
+
+    void declareUnresolved(Collection<String> profileIDs) {
+        idResolver.declareUnresolved(profileIDs);
+    }
+
+    void declareForbidden(Collection<String> profileIDs) {
+        for (String profileID: profileIDs) {
+            validator.forbidExplicitly(profileID);
+        }
+    }
+
+    void activate(List<Profile> profiles) throws ResolutionValidationException {
+        for (Profile profile : profiles) {
+            setActive(profile);
+        }
+        validator.validate();
+        for (Profile profile : profiles) {
+            collectDependencies(profile);
+        }
+        validator.validate();
+    }
+
+    DependencyResolution resolve() throws ResolutionValidationException {
+        validator.validate();
+        List<Profile> profiles;
+        while (!(profiles = idResolver.resolveUnambigous()).isEmpty()) {
+            activate(profiles);
         }
         if (!idResolver.ambiguityExists())
             return this;
@@ -48,7 +59,16 @@ class DependencyResolution {
             return idResolver.createResolutionForAmbigousIDs(new ChildFactory(this));
     }
 
-    private void activate(Profile profile) {
+    @Override
+    public DependencyResolution clone() {
+        DependencyResolution result = new DependencyResolution(idResolver.availableProfiles());
+        result.idResolver.include(idResolver);
+        result.validator.addAll(validator);
+        result.collector.addAll(collector.activeProfiles());
+        return result;
+    }
+
+    private void setActive(Profile profile) {
         Collection<String> profileIDs = DependableProfile.providedIDs(profile);
         for (String profileID : profileIDs) {
             idResolver.declareResolved(profileID);
@@ -75,14 +95,6 @@ class DependencyResolution {
         }
     }
 
-    List<Profile> activeProfiles() {
-        return collector.activeProfiles();
-    }
-
-    private void declareUnresolved(Collection<String> unresolvedProfileIDs) {
-        idResolver.declareUnresolved(unresolvedProfileIDs);
-    }
-
     private static class ChildFactory implements DependencyResolutionFactory {
         private final DependencyResolution parent;
 
@@ -92,11 +104,7 @@ class DependencyResolution {
 
         @Override
         public DependencyResolution createDependencyResolution() {
-            DependencyResolution result = new DependencyResolution(parent.idResolver.availableProfiles());
-            result.idResolver.include(parent.idResolver);
-            result.validator.addAll(parent.validator);
-            result.collector.addAll(parent.collector.activeProfiles());
-            return result;
+            return parent.clone();
         }
     }
 }
