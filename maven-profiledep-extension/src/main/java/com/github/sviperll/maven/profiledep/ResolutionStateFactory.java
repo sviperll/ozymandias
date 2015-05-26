@@ -9,6 +9,6 @@ package com.github.sviperll.maven.profiledep;
  *
  * @author vir
  */
-interface DependencyResolutionFactory {
-    DependencyResolution createDependencyResolution();
+interface ResolutionStateFactory {
+    ResolutionState createResolutionState();
 }

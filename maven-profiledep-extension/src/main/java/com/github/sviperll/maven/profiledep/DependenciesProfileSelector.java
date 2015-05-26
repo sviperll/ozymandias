@@ -5,9 +5,12 @@
  */
 package com.github.sviperll.maven.profiledep;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import org.apache.maven.model.Activation;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.building.ModelProblem;
@@ -35,42 +38,66 @@ public class DependenciesProfileSelector implements ProfileSelector {
 
     @Override
     public List<Profile> getActiveProfiles(Collection<Profile> availableProfiles, ProfileActivationContext context, ModelProblemCollector problems) {
-        DependencyResolution resolution = new DependencyResolution(availableProfiles);
-        resolution.declareForbidden(context.getInactiveProfileIds());
-        resolution.declareUnresolved(context.getActiveProfileIds());
+        TransactionalDependencyResolver resolver = TransactionalDependencyResolver.createInstance(availableProfiles);
+        resolver.declareForbidden(context.getInactiveProfileIds());
+
+        Set<String> activeProfileIDs = new TreeSet<String>();
+        activeProfileIDs.addAll(context.getActiveProfileIds());
+        activeProfileIDs.removeAll(context.getInactiveProfileIds());
+        resolver.declareUnresolved(activeProfileIDs);
+
+        List<Profile> activatedProfiles = getActivatedProfiles(availableProfiles, context, problems);
         try {
-            resolution = resolution.resolve();
+            resolver.activate(activatedProfiles);
+            resolver.resolve();
         } catch (ResolutionValidationException ex) {
             ModelProblemCollectorRequest request = new ModelProblemCollectorRequest(ModelProblem.Severity.FATAL, ModelProblem.Version.BASE);
             request.setMessage("\n" + ex.renderResolutionTree());
             problems.add(request);
             return Collections.emptyList();
         }
-        for (Profile profile: availableProfiles) {
-            if (isActive(profile, context, problems)) {
-                DependencyResolution possibleResolution = resolution.clone();
+        activatedProfiles = getActiveByDefaultProfiles(availableProfiles, context, problems);
+        if (resolver.activeProfiles().isEmpty()) {
+            try {
+                resolver.activate(activatedProfiles);
+                resolver.resolve();
+            } catch (ResolutionValidationException ex) {
+                ModelProblemCollectorRequest request = new ModelProblemCollectorRequest(ModelProblem.Severity.FATAL, ModelProblem.Version.BASE);
+                request.setMessage("\n" + ex.renderResolutionTree());
+                problems.add(request);
+                return Collections.emptyList();
+            }
+        } else {
+            for (Profile profile: activatedProfiles) {
+                resolver.begin();
                 try {
-                    possibleResolution.activate(Collections.singletonList(profile));
-                    resolution = possibleResolution.resolve();
+                    resolver.activate(Collections.singletonList(profile));
+                    resolver.resolve();
+                    resolver.commit();
                 } catch (ResolutionValidationException ex) {
-                    // Skip implicitly activated profile, since
-                    // it conflicts with explicitly activated
+                    resolver.rollback();
                 }
             }
         }
+        return resolver.activeProfiles();
+    }
+
+    private List<Profile> getActivatedProfiles(Collection<Profile> availableProfiles, ProfileActivationContext context, ModelProblemCollector problems) {
+        List<Profile> result = new ArrayList<Profile>();
         for (Profile profile: availableProfiles) {
-            if (isActiveByDefault(profile)) {
-                DependencyResolution possibleResolution = resolution.clone();
-                try {
-                    possibleResolution.activate(Collections.singletonList(profile));
-                    resolution = possibleResolution.resolve();
-                } catch (ResolutionValidationException ex) {
-                    // Skip activated by default profile, since
-                    // it conflicts with explicitly activated
-                }
-            }
+            if (isActive(profile, context, problems) && !context.getInactiveProfileIds().contains(profile.getId()))
+                result.add(profile);
         }
-        return resolution.activeProfiles();
+        return result;
+    }
+
+    private List<Profile> getActiveByDefaultProfiles(Collection<Profile> availableProfiles, ProfileActivationContext context, ModelProblemCollector problems) {
+        List<Profile> result = new ArrayList<Profile>();
+        for (Profile profile: availableProfiles) {
+            if (isActiveByDefault(profile) && !context.getInactiveProfileIds().contains(profile.getId()))
+                result.add(profile);
+        }
+        return result;
     }
 
     private boolean isActive(Profile profile, ProfileActivationContext context, ModelProblemCollector problems) {
@@ -93,4 +120,5 @@ public class DependenciesProfileSelector implements ProfileSelector {
         Activation activation = profile.getActivation();
         return activation != null && activation.isActiveByDefault();
     }
+
 }

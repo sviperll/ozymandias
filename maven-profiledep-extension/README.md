@@ -217,6 +217,13 @@ never `mustache` profile from `myparent` pom.
 
 This can be used to override profile from parent pom, for example.
 
+Active by default profiles
+--------------------------
+
+maven-profileddep-extension always try to activate all profiles
+marked as activeByDefault. Only those profiles that do not conflict with
+explicitly activated profiles are activated.
+
 Installation
 ------------
 

@@ -5,15 +5,11 @@
  */
 package com.github.sviperll.maven.profiledep;
 
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
 import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.building.ModelProblemCollector;
-import org.apache.maven.model.profile.DefaultProfileSelector;
 import org.apache.maven.model.profile.ProfileActivationContext;
 import org.apache.maven.model.profile.ProfileSelector;
 import org.apache.maven.model.profile.activation.ProfileActivator;
@@ -29,6 +25,9 @@ public class ConfiguringProfileSelector implements ProfileSelector {
     private final ContextualProfileSelector instance;
     private final Logger logger;
 
+    // It's somewhat undocumented, but
+    // Maven since 3.0 provides plexus implementation build on Google Guice
+    // So we can directly use Guice's @Inject
     @Inject
     public ConfiguringProfileSelector(Logger logger, List<ProfileActivator> activators) {
         this.logger = logger;
@@ -39,7 +38,6 @@ public class ConfiguringProfileSelector implements ProfileSelector {
 
     @Override
     public List<Profile> getActiveProfiles(Collection<Profile> profiles, ProfileActivationContext context, ModelProblemCollector problems) {
-        logger.info(MessageFormat.format("ConfiguringProfileSelector.getAciveProfiles {0}", context));
         return instance.getActiveProfiles(profiles, context, problems);
     }
 

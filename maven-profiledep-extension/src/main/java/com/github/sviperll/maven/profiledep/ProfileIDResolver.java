@@ -90,7 +90,7 @@ class ProfileIDResolver {
         }
     }
 
-    DependencyResolution createResolutionForAmbigousIDs(DependencyResolutionFactory resolutonFactory) throws ResolutionValidationException {
+    ResolutionState findStateForAmbigousIDs(ResolutionStateFactory stateFactory) throws ResolutionValidationException {
         String profileID = ambigousProfileIDs.iterator().next();
         List<Profile> candidates = new ArrayList<Profile>();
         for (Profile profile : availableProfiles) {
@@ -102,10 +102,10 @@ class ProfileIDResolver {
         TreeBuilder<String> resolutionTreeBuilder = TreeBuilder.createInstance(".");
         resolutionTreeBuilder.beginSubtree("Can't resolve " + profileID);
         for (Profile profile : candidates) {
-            DependencyResolution resolution = resolutonFactory.createDependencyResolution();
+            ResolutionState state = stateFactory.createResolutionState();
             try {
-                resolution.activate(Collections.singletonList(profile));
-                return resolution.resolve();
+                state.activate(Collections.singletonList(profile));
+                return state.evolve();
             } catch (ResolutionValidationException ex) {
                 resolutionTreeBuilder.subtree(" to " + profile.getId(), ex.tree().children());
             }

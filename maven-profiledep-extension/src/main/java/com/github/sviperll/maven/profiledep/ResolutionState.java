@@ -13,12 +13,13 @@ import org.apache.maven.model.Profile;
  *
  * @author vir
  */
-class DependencyResolution implements Cloneable {
+// It must be final to have correct clone implementation
+final class ResolutionState implements Cloneable {
     private final ProfileIDResolver idResolver;
     private final DependencyResolutionValidator validator = new DependencyResolutionValidator();
     private final ProfileCollector collector = new ProfileCollector();
 
-    DependencyResolution(Collection<Profile> availableProfiles) {
+    ResolutionState(Collection<Profile> availableProfiles) {
         this.idResolver = new ProfileIDResolver(availableProfiles);
     }
 
@@ -47,7 +48,7 @@ class DependencyResolution implements Cloneable {
         validator.validate();
     }
 
-    DependencyResolution resolve() throws ResolutionValidationException {
+    ResolutionState evolve() throws ResolutionValidationException {
         validator.validate();
         List<Profile> profiles;
         while (!(profiles = idResolver.resolveUnambigous()).isEmpty()) {
@@ -56,12 +57,19 @@ class DependencyResolution implements Cloneable {
         if (!idResolver.ambiguityExists())
             return this;
         else
-            return idResolver.createResolutionForAmbigousIDs(new ChildFactory(this));
+            return idResolver.findStateForAmbigousIDs(new ChildFactory(this));
     }
 
+    // We do not want to call super.clone, but call constructor instead
+    // since it allows up to use final fields.
+    // We don't need to call super.clone method, since
+    // we have no need to create instances of any subtype because
+    // no subtypes exists.
+    // Clone is always called from ResolutionState type  because
+    // class is declared final.
     @Override
-    public DependencyResolution clone() {
-        DependencyResolution result = new DependencyResolution(idResolver.availableProfiles());
+    public ResolutionState clone() {
+        ResolutionState result = new ResolutionState(idResolver.availableProfiles());
         result.idResolver.include(idResolver);
         result.validator.addAll(validator);
         result.collector.addAll(collector.activeProfiles());
@@ -95,15 +103,15 @@ class DependencyResolution implements Cloneable {
         }
     }
 
-    private static class ChildFactory implements DependencyResolutionFactory {
-        private final DependencyResolution parent;
+    private static class ChildFactory implements ResolutionStateFactory {
+        private final ResolutionState parent;
 
-        private ChildFactory(DependencyResolution parent) {
+        private ChildFactory(ResolutionState parent) {
             this.parent = parent;
         }
 
         @Override
-        public DependencyResolution createDependencyResolution() {
+        public ResolutionState createResolutionState() {
             return parent.clone();
         }
     }
