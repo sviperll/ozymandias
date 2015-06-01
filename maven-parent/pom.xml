@@ -12,6 +12,9 @@
     <name>maven-parent</name>
     <description>Artifact to use as universal maven parent</description>
     <url>https://github.com/sviperll/ozymandias/tree/master/maven-parent</url>
+    <properties>
+        <profile.activate.default>true</profile.activate.default>
+    </properties>
     <build>
         <pluginManagement>
             <plugins>
@@ -236,14 +239,14 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <profileprovide>java-compiler-plugin</profileprovide>
+                <profile.provides>java-compiler-plugin</profile.provides>
             </properties>
         </profile>
         <profile>
             <!-- Use takari-lifecycle-plugin instead of maven-compiler-plugin -->
             <id>takari-lifecycle-plugin-compile</id>
             <properties>
-                <profileprovide>java-compiler-plugin</profileprovide>
+                <profile.provides>java-compiler-plugin</profile.provides>
             </properties>
             <build>
                 <plugins>
@@ -282,7 +285,7 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <profileprovide>java-version</profileprovide>
+                <profile.provides>java-version</profile.provides>
             </properties>
             <build>
                 <plugins>
@@ -308,7 +311,7 @@
         <profile>
             <id>java7</id>
             <properties>
-                <profileprovide>java-version</profileprovide>
+                <profile.provides>java-version</profile.provides>
             </properties>
             <build>
                 <plugins>
@@ -334,7 +337,7 @@
         <profile>
             <id>java8</id>
             <properties>
-                <profileprovide>java-version</profileprovide>
+                <profile.provides>java-version</profile.provides>
             </properties>
             <build>
                 <plugins>
@@ -390,8 +393,8 @@
         <profile>
             <id>java6-bootclasspath</id>
             <properties>
-                <profiledep>java6,fork-javac,maven-compiler-plugin-compile</profiledep>
-                <profileprovide>bootclasspath</profileprovide>
+                <profile.depends>java6,fork-javac,maven-compiler-plugin-compile</profile.depends>
+                <profile.provides>bootclasspath</profile.provides>
             </properties>
             <build>
                 <plugins>
@@ -424,8 +427,8 @@
         <profile>
             <id>java7-bootclasspath</id>
             <properties>
-                <profiledep>java7,fork-javac,maven-compiler-plugin-compile</profiledep>
-                <profileprovide>bootclasspath</profileprovide>
+                <profile.depends>java7,fork-javac,maven-compiler-plugin-compile</profile.depends>
+                <profile.provides>bootclasspath</profile.provides>
             </properties>
             <build>
                 <plugins>
@@ -458,8 +461,8 @@
         <profile>
             <id>java8-bootclasspath</id>
             <properties>
-                <profiledep>java8,fork-javac,maven-compiler-plugin-compile</profiledep>
-                <profileprovide>bootclasspath</profileprovide>
+                <profile.depends>java8,fork-javac,maven-compiler-plugin-compile</profile.depends>
+                <profile.provides>bootclasspath</profile.provides>
             </properties>
             <build>
                 <plugins>
@@ -489,20 +492,20 @@
         <profile>
             <id>no-deploy-to-maven-repository</id>
             <properties>
-                <profileprovide>deploy-to-maven-repository</profileprovide>
-                <profiledep>no-default-deploy</profiledep>
+                <profile.provides>deploy-to-maven-repository</profile.provides>
+                <profile.depends>no-default-deploy</profile.depends>
             </properties>
         </profile>
         <profile>
             <id>default-deploy</id>
             <properties>
-                <profileprovide>default-deploy-choice,deploy-to-maven-repository</profileprovide>
+                <profile.provides>default-deploy-choice,deploy-to-maven-repository</profile.provides>
             </properties>
         </profile>
         <profile>
             <id>no-default-deploy</id>
             <properties>
-                <profileprovide>default-deploy-choice</profileprovide>
+                <profile.provides>default-deploy-choice</profile.provides>
             </properties>
             <build>
                 <plugins>
@@ -525,8 +528,8 @@
         <profile>
             <id>nexus-deploy</id>
             <properties>
-                <profileprovide>deploy-to-maven-repository</profileprovide>
-                <profiledep>no-default-deploy</profiledep>
+                <profile.provides>deploy-to-maven-repository</profile.provides>
+                <profile.depends>no-default-deploy</profile.depends>
             </properties>
             <build>
                 <plugins>
@@ -578,7 +581,7 @@
         <profile>
             <id>executable</id>
             <properties>
-                <profiledep>has-main-class,!deploy-to-maven-repository,bin-with-dependencies</profiledep>
+                <profile.depends>has-main-class,!deploy-to-maven-repository,bin-with-dependencies</profile.depends>
             </properties>
         </profile>
         <profile>
@@ -673,7 +676,7 @@
         <profile>
             <id>strict-dependencies-usage</id>
             <properties>
-                <profiledep>analyze-dependencies</profiledep>
+                <profile.depends>analyze-dependencies</profile.depends>
             </properties>
             <build>
                 <plugins>
@@ -717,7 +720,7 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <profiledep>strict-dependencies-usage,enforce-dependencies-versions</profiledep>
+                <profile.depends>strict-dependencies-usage,enforce-dependencies-versions</profile.depends>
             </properties>
         </profile>
     </profiles>

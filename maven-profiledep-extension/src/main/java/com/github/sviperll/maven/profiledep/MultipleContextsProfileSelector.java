@@ -30,54 +30,42 @@
 package com.github.sviperll.maven.profiledep;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.maven.model.Profile;
+import org.apache.maven.model.building.ModelProblemCollector;
+import org.apache.maven.model.profile.ProfileActivationContext;
+import org.apache.maven.model.profile.ProfileSelector;
 
 /**
  *
  * @author vir
  */
-class StatefullDependencyResolver implements DependencyResolver {
+public class MultipleContextsProfileSelector implements ProfileSelector {
+    private static final Logger logger = Logger.getLogger(MultipleContextsProfileSelector.class.getName());
 
-    static StatefullDependencyResolver createInstance(Collection<Profile> availableProfiles) {
-        return new StatefullDependencyResolver(new ResolutionState(availableProfiles));
-    }
-    private ResolutionState state;
-    
-    StatefullDependencyResolver(ResolutionState state) {
-        this.state = state;
-    }
+    /* HACK:
+     * Each ModelProblemCollector specifies single chain of profile resolution from child to parent, up to root pom.
+     * Each chain should be resolved individually, so we keep a map to hold each chain state.
+     */
+    private final Map<ProfileActivationContext, ProfileSelector> selectors = new HashMap<ProfileActivationContext, ProfileSelector>();
+    private final ProfileSelectorFactory factory;
 
-    ResolutionState getState() {
-        return state;
-    }
-
-    void setState(ResolutionState state) {
-        this.state = state;
+    MultipleContextsProfileSelector(ProfileSelectorFactory factory) {
+        this.factory = factory;
     }
 
     @Override
-    public List<Profile> activeProfiles() {
-        return state.activeProfiles();
-    }
-
-    @Override
-    public void declareUnresolved(Collection<String> profileIDs) {
-        state.declareUnresolved(profileIDs);
-    }
-
-    @Override
-    public void declareForbidden(Collection<String> profileIDs) {
-        state.declareForbidden(profileIDs);
-    }
-
-    @Override
-    public void activate(List<Profile> profiles) throws ResolutionValidationException {
-        state.activate(profiles);
-    }
-
-    @Override
-    public void resolve() throws ResolutionValidationException {
-        state = state.evolve();
+    public List<Profile> getActiveProfiles(Collection<Profile> profiles, ProfileActivationContext context, ModelProblemCollector problems) {
+        logger.log(Level.INFO, "{0}.getActiveProfiles(?, {1}, ?)", new Object[] {MultipleContextsProfileSelector.class.getSimpleName(), context});
+        ProfileSelector selector = selectors.get(context);
+        if (selector == null) {
+            selector = factory.createProfileSelector();
+            selectors.put(context, selector);
+        }
+        return selector.getActiveProfiles(profiles, context, problems);
     }
 }

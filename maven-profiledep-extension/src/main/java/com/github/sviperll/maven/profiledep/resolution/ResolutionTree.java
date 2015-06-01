@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.github.sviperll.maven.profiledep;
+package com.github.sviperll.maven.profiledep.resolution;
 
 import com.github.sviperll.maven.profiledep.util.Tree;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author vir
  */
-public class ResolutionTree {
+class ResolutionTree {
     private final Tree<String> tree;
     public ResolutionTree(Tree<String> tree) {
         this.tree = tree;

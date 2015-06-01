@@ -27,8 +27,9 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  *  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.github.sviperll.maven.profiledep;
+package com.github.sviperll.maven.profiledep.resolution;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.apache.maven.model.Profile;
@@ -37,16 +38,54 @@ import org.apache.maven.model.Profile;
  *
  * @author vir
  */
-public interface DependencyResolver {
+public class DependencyResolver implements BasicDependencyResolver {
+    public static DependencyResolver createInstance(Collection<Profile> availableProfiles) {
+        return new DependencyResolver(StatefullDependencyResolver.createInstance(availableProfiles));
+    }
+    private final StatefullDependencyResolver statefullResolver;
+    private final List<ResolutionState> savedState = new ArrayList<ResolutionState>();
 
-    void activate(List<Profile> profiles) throws ResolutionValidationException;
+    private DependencyResolver(StatefullDependencyResolver statefullResolver) {
+        this.statefullResolver = statefullResolver;
+    }
 
-    List<Profile> activeProfiles();
+    void begin() {
+        ResolutionState state = statefullResolver.getState();
+        savedState.add(state);
+        statefullResolver.setState(state.clone());
+    }
 
-    void declareForbidden(Collection<String> profileIDs);
+    void commit() {
+        savedState.remove(savedState.size() - 1);
+    }
 
-    void declareUnresolved(Collection<String> profileIDs);
-
-    void resolve() throws ResolutionValidationException;
+    void rollback() {
+        ResolutionState state = savedState.remove(savedState.size() - 1);
+        statefullResolver.setState(state);
+    }
     
+    @Override
+    public void activate(List<Profile> profiles) throws ResolutionValidationException {
+        statefullResolver.activate(profiles);
+    }
+
+    @Override
+    public List<Profile> activeProfiles() {
+        return statefullResolver.activeProfiles();
+    }
+
+    @Override
+    public void declareForbidden(Collection<String> profileIDs) {
+        statefullResolver.declareForbidden(profileIDs);
+    }
+
+    @Override
+    public void declareUnresolved(Collection<String> profileIDs) {
+        statefullResolver.declareUnresolved(profileIDs);
+    }
+
+    @Override
+    public void resolve() throws ResolutionValidationException {
+        statefullResolver.resolve();
+    }
 }

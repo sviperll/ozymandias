@@ -12,25 +12,24 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.building.ModelProblemCollector;
 import org.apache.maven.model.profile.DefaultProfileActivationContext;
 import org.apache.maven.model.profile.ProfileActivationContext;
 import org.apache.maven.model.profile.ProfileSelector;
-import org.codehaus.plexus.logging.Logger;
 
 /**
  *
  * @author vir
  */
-public class ActivatingProfileSelector implements ProfileSelector {
-    private final Logger logger;
-    private final ProfileSelector defaultProfileSelector;
-    private final Set<String> additionalProfileIDs = new TreeSet<String>();
-    private final Set<String> additionallyExcludedProfileIDs = new TreeSet<String>();
+public class ContextModifyingProfileSelector implements ProfileSelector {
+    private static final Logger logger = Logger.getLogger(ContextModifyingProfileSelector.class.getName());
+    private final DependenciesProfileSelector defaultProfileSelector;
+    private Set<String> additionalProfileIDs = new TreeSet<String>();
+    private Set<String> additionallyExcludedProfileIDs = new TreeSet<String>();
 
-    ActivatingProfileSelector(Logger logger, ProfileSelector defaultProfileSelector) {
-        this.logger = logger;
+    ContextModifyingProfileSelector(DependenciesProfileSelector defaultProfileSelector) {
         this.defaultProfileSelector = defaultProfileSelector;
     }
 
@@ -43,7 +42,7 @@ public class ActivatingProfileSelector implements ProfileSelector {
     }
 
     private void updateAdditionalProfileIDs(Map<String, String> projectProperties) {
-        String activateparentprofiles = projectProperties.get("activateparentprofiles");
+        String activateparentprofiles = projectProperties.get(PropertyName.ACTIVATE_PARENT_PROFILES);
         if (activateparentprofiles != null) {
             activateparentprofiles = activateparentprofiles.trim();
             if (!activateparentprofiles.isEmpty()) {
@@ -59,11 +58,12 @@ public class ActivatingProfileSelector implements ProfileSelector {
                         activateSet.add(profileID);
                     }
                 }
-                activateSet.removeAll(deactivateSet);
-                additionalProfileIDs.removeAll(deactivateSet);
-                additionallyExcludedProfileIDs.removeAll(activateSet);
-                additionalProfileIDs.addAll(activateSet);
-                additionallyExcludedProfileIDs.addAll(deactivateSet);
+                activateSet.removeAll(additionallyExcludedProfileIDs);
+                deactivateSet.removeAll(additionalProfileIDs);
+                activateSet.addAll(additionalProfileIDs);
+                deactivateSet.addAll(additionallyExcludedProfileIDs);
+                additionalProfileIDs = activateSet;
+                additionallyExcludedProfileIDs = deactivateSet;
             }
         }
     }
@@ -78,29 +78,30 @@ public class ActivatingProfileSelector implements ProfileSelector {
         result.setUserProperties(source.getUserProperties());
         
         List<String> activeProfileIds = new ArrayList<String>();
-        activeProfileIds.addAll(source.getActiveProfileIds());
         activeProfileIds.addAll(additionalProfileIDs);
+        activeProfileIds.removeAll(source.getInactiveProfileIds());
+        activeProfileIds.addAll(source.getActiveProfileIds());
         result.setActiveProfileIds(activeProfileIds);
 
         List<String> inactiveProfileIds = new ArrayList<String>();
-        inactiveProfileIds.addAll(source.getInactiveProfileIds());
         inactiveProfileIds.addAll(additionallyExcludedProfileIDs);
+        inactiveProfileIds.removeAll(source.getActiveProfileIds());
+        inactiveProfileIds.addAll(source.getInactiveProfileIds());
         result.setInactiveProfileIds(inactiveProfileIds);
+
         return result;
     }
 
     static class Factory implements ProfileSelectorFactory {
-        private final Logger logger;
-        private final ProfileSelector profileSelector;
+        private final DependenciesProfileSelector profileSelector;
 
-        public Factory(Logger logger, ProfileSelector profileSelector) {
-            this.logger = logger;
+        public Factory(DependenciesProfileSelector profileSelector) {
             this.profileSelector = profileSelector;
         }
 
         @Override
         public ProfileSelector createProfileSelector() {
-            return new ActivatingProfileSelector(logger, profileSelector);
+            return new ContextModifyingProfileSelector(profileSelector);
         }
     }
 }

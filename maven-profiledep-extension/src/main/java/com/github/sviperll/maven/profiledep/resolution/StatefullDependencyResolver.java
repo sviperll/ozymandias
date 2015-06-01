@@ -27,43 +27,57 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  *  EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.github.sviperll.maven.profiledep;
+package com.github.sviperll.maven.profiledep.resolution;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.maven.model.Profile;
-import org.apache.maven.model.building.ModelProblemCollector;
-import org.apache.maven.model.profile.ProfileActivationContext;
-import org.apache.maven.model.profile.ProfileSelector;
-import org.codehaus.plexus.logging.Logger;
 
 /**
  *
  * @author vir
  */
-public class ContextualProfileSelector implements ProfileSelector {
-    /* HACK:
-     * Each ModelProblemCollector specifies single chain of profile resolution from child to parent, up to root pom.
-     * Each chain should be resolved individually, so we keep a map to hold each chain state.
-     */
-    private final Map<ProfileActivationContext, ProfileSelector> selectors = new HashMap<ProfileActivationContext, ProfileSelector>();
-    private final ProfileSelectorFactory factory;
-    private final Logger logger;
+class StatefullDependencyResolver implements BasicDependencyResolver {
 
-    ContextualProfileSelector(Logger logger, ProfileSelectorFactory factory) {
-        this.logger = logger;
-        this.factory = factory;
+    static StatefullDependencyResolver createInstance(Collection<Profile> availableProfiles) {
+        return new StatefullDependencyResolver(new ResolutionState(availableProfiles));
+    }
+    private ResolutionState state;
+    
+    StatefullDependencyResolver(ResolutionState state) {
+        this.state = state;
+    }
+
+    ResolutionState getState() {
+        return state;
+    }
+
+    void setState(ResolutionState state) {
+        this.state = state;
     }
 
     @Override
-    public List<Profile> getActiveProfiles(Collection<Profile> profiles, ProfileActivationContext context, ModelProblemCollector problems) {
-        ProfileSelector selector = selectors.get(context);
-        if (selector == null) {
-            selector = factory.createProfileSelector();
-            selectors.put(context, selector);
-        }
-        return selector.getActiveProfiles(profiles, context, problems);
+    public List<Profile> activeProfiles() {
+        return state.activeProfiles();
+    }
+
+    @Override
+    public void declareUnresolved(Collection<String> profileIDs) {
+        state.declareUnresolved(profileIDs);
+    }
+
+    @Override
+    public void declareForbidden(Collection<String> profileIDs) {
+        state.declareForbidden(profileIDs);
+    }
+
+    @Override
+    public void activate(List<Profile> profiles) throws ResolutionValidationException {
+        state.activate(profiles);
+    }
+
+    @Override
+    public void resolve() throws ResolutionValidationException {
+        state = state.evolve();
     }
 }

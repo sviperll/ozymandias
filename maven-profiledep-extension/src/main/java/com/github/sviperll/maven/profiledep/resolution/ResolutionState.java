@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.github.sviperll.maven.profiledep;
+package com.github.sviperll.maven.profiledep.resolution;
 
+import com.github.sviperll.maven.profiledep.PropertyName;
 import java.util.Collection;
 import java.util.List;
 import org.apache.maven.model.Profile;
@@ -62,11 +63,11 @@ final class ResolutionState implements Cloneable {
 
     // We do not want to call super.clone, but call constructor instead
     // since it allows up to use final fields.
+    // Clone is always called from ResolutionState type  because
+    // class is declared final.
     // We don't need to call super.clone method, since
     // we have no need to create instances of any subtype because
     // no subtypes exists.
-    // Clone is always called from ResolutionState type  because
-    // class is declared final.
     @Override
     public ResolutionState clone() {
         ResolutionState result = new ResolutionState(idResolver.availableProfiles());
@@ -86,7 +87,7 @@ final class ResolutionState implements Cloneable {
     }
 
     private void collectDependencies(Profile profile) {
-        String profiledep = profile.getProperties().getProperty("profiledep", "").trim();
+        String profiledep = profile.getProperties().getProperty(PropertyName.PROFILE_DEPENDS, "").trim();
         if (!profiledep.isEmpty()) {
             String[] dependencies = profiledep.split("[,;]", -1);
             for (String dependency : dependencies) {

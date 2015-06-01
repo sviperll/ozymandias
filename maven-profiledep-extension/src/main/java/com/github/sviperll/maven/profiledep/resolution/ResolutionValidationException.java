@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.github.sviperll.maven.profiledep;
+package com.github.sviperll.maven.profiledep.resolution;
 
 import com.github.sviperll.maven.profiledep.util.Tree;
 
@@ -12,7 +12,7 @@ import com.github.sviperll.maven.profiledep.util.Tree;
  * @author vir
  */
 @SuppressWarnings("serial")
-class ResolutionValidationException extends Exception {
+public class ResolutionValidationException extends Exception {
 
     private final Tree<String> tree;
 
@@ -25,7 +25,7 @@ class ResolutionValidationException extends Exception {
         return tree;
     }
 
-    String renderResolutionTree() {
+    public String renderResolutionTree() {
         return new ResolutionTree(tree).toString();
     }
 }

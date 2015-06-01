@@ -5,6 +5,7 @@
  */
 package com.github.sviperll.maven.profiledep;
 
+import com.github.sviperll.maven.profiledep.util.PlexusLoggingHandler;
 import java.util.Collection;
 import java.util.List;
 import javax.inject.Inject;
@@ -22,24 +23,35 @@ import org.codehaus.plexus.logging.Logger;
 */
 @Component(role = ProfileSelector.class)
 public class ConfiguringProfileSelector implements ProfileSelector {
-    private final ContextualProfileSelector instance;
+    private final MultipleContextsProfileSelector instance;
     private final Logger logger;
 
     // It's somewhat undocumented, but
     // Maven since 3.0 provides plexus implementation build on Google Guice
     // So we can directly use Guice's @Inject
     @Inject
-    public ConfiguringProfileSelector(Logger logger, List<ProfileActivator> activators) {
+    public ConfiguringProfileSelector(final Logger logger, List<ProfileActivator> activators) {
         this.logger = logger;
-        DependenciesProfileSelector dependenciesProfileSelector = new DependenciesProfileSelector(logger, activators);
-        ActivatingProfileSelector.Factory factory = new ActivatingProfileSelector.Factory(logger, dependenciesProfileSelector);
-        instance = new ContextualProfileSelector(logger, factory);
+        setJavaLoggersRootHandler(new PlexusLoggingHandler(logger));
+        StrongDefaultActivationProfileSelector defaultProfileSelector = new StrongDefaultActivationProfileSelector(activators);
+        DependenciesProfileSelector dependenciesProfileSelector = new DependenciesProfileSelector(defaultProfileSelector);
+        ContextModifyingProfileSelector.Factory factory = new ContextModifyingProfileSelector.Factory(dependenciesProfileSelector);
+        instance = new MultipleContextsProfileSelector(factory);
+    }
+
+    private void setJavaLoggersRootHandler(java.util.logging.Handler handler) throws SecurityException {
+        java.util.logging.Logger javaLogger = java.util.logging.Logger.getLogger("");
+        java.util.logging.Handler[] handlers = javaLogger.getHandlers();
+        for (java.util.logging.Handler anyHandler: handlers)
+            javaLogger.removeHandler(anyHandler);
+        handler.setLevel(java.util.logging.Level.ALL);
+        javaLogger.addHandler(handler);
+        javaLogger.setLevel(java.util.logging.Level.ALL);
+        javaLogger.setUseParentHandlers(false);
     }
 
     @Override
     public List<Profile> getActiveProfiles(Collection<Profile> profiles, ProfileActivationContext context, ModelProblemCollector problems) {
         return instance.getActiveProfiles(profiles, context, problems);
     }
-
-    
 }
