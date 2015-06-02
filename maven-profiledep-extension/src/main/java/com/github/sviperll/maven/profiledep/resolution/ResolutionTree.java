@@ -15,7 +15,7 @@ import java.util.List;
  */
 class ResolutionTree {
     private final Tree<String> tree;
-    public ResolutionTree(Tree<String> tree) {
+    ResolutionTree(Tree<String> tree) {
         this.tree = tree;
     }
 

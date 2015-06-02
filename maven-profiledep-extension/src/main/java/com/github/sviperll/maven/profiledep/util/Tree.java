@@ -5,13 +5,16 @@
  */
 package com.github.sviperll.maven.profiledep.util;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  *
  * @author vir
  */
-public class Tree<T> {
+public class Tree<T> implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private final T value;
     private final List<Tree<T>> children;
 

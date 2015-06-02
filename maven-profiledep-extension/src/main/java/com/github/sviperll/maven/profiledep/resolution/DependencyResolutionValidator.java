@@ -113,6 +113,6 @@ class DependencyResolutionValidator {
         if (profile == EXPLICIT_DEMAND)
             return "<explicit demand>";
         else
-            return profile.getId() + ":" + profile.getLocation("").getSource().getModelId();
+            return profile.getId();
     }
 }

@@ -60,7 +60,7 @@ public class MultipleContextsProfileSelector implements ProfileSelector {
 
     @Override
     public List<Profile> getActiveProfiles(Collection<Profile> profiles, ProfileActivationContext context, ModelProblemCollector problems) {
-        logger.log(Level.INFO, "{0}.getActiveProfiles(?, {1}, ?)", new Object[] {MultipleContextsProfileSelector.class.getSimpleName(), context});
+        logger.log(Level.FINE, "{0}.getActiveProfiles(?, {1}, ?)", new Object[] {MultipleContextsProfileSelector.class.getSimpleName(), context});
         ProfileSelector selector = selectors.get(context);
         if (selector == null) {
             selector = factory.createProfileSelector();

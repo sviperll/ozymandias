@@ -15,7 +15,7 @@ Profile activation is implemented with [maven-profiledep-extension](https://gith
     <parent>
         <groupId>com.github.sviperll</groupId>
         <artifactId>maven-parent</artifactId>
-        <version>0.6</version>
+        <version>0.7</version>
     </parent>
     <groupId>group</groupId>
     <artifactId>myartifact</artifactId>
@@ -58,6 +58,21 @@ to deploy artifact to running nexus instance
 
 Add main class and classpath to jar manifest and create archives with
 jar file and it's dependencies
+
+### strict-dependencies ###
+
+Implies strict-dependencies-usage and enforce-dependencies-versions profiles
+described below.
+
+### strict-dependencies-usage ###
+
+Use analyze-only goal of maven-dependency-plugin to make all
+dependencies explicit and to get rid of unused dependencies
+
+### enforce-dependencies-versions ###
+
+Use enforcer plugin to make sure that all transitive dependencies
+are resolved and same version number is chosen for same artifacts.
 
 ### no-deploy-to-maven-repository ###
 

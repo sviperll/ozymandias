@@ -25,7 +25,13 @@ final class ResolutionState implements Cloneable {
     }
 
     List<Profile> activeProfiles() {
+        if (!isResolved())
+            throw new IllegalStateException("ResolutionState is not resolved");
         return collector.activeProfiles();
+    }
+
+    boolean isResolved() {
+        return !idResolver.canResolve();
     }
 
     void declareUnresolved(Collection<String> profileIDs) {

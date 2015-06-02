@@ -57,24 +57,23 @@ public class StrongDefaultActivationProfileSelector implements ProfileSelector {
 
     @Override
     public List<Profile> getActiveProfiles(Collection<Profile> availableProfiles, ProfileActivationContext context, ModelProblemCollector problems) {
-        logger.log(Level.INFO, "{0}.getActiveProfiles(?, '{'inactiveProfileIds = {1}, activeProfileIds = {2}'}', ?)", new Object[] {StrongDefaultActivationProfileSelector.class.getSimpleName(), context.getInactiveProfileIds(), context.getActiveProfileIds()});
-        String activatesActiveByDefaultString = context.getProjectProperties().get(PropertyName.ACTIVATE_ACTIVE_BY_DEFAULT_PROFILES);
-        boolean activatesActiveByDefault = activatesActiveByDefaultString != null
-                && (activatesActiveByDefaultString.equals("true")
-                    || activatesActiveByDefaultString.equals("yes"));
+        logger.log(Level.FINE, "{0}.getActiveProfiles(?, '{'inactiveProfileIds = {1}, activeProfileIds = {2}'}', ?)", new Object[] {StrongDefaultActivationProfileSelector.class.getSimpleName(), context.getInactiveProfileIds(), context.getActiveProfileIds()});
         List<Profile> activatedProfiles = getActivatedProfiles(availableProfiles, context, problems);
-        if (activatesActiveByDefault) {
-            for (Profile profile: getActiveByDefaultProfiles(availableProfiles, context, problems)) {
-                if (!activatedProfiles.contains(profile))
-                    activatedProfiles.add(profile);
-            }
-        } else if (activatedProfiles.isEmpty()) {
+        if (activatedProfiles.isEmpty()) {
             // Default profiles are activated only if nothing else is activated
             // This behaviour is the same as DefaultProfileSelector
 
             activatedProfiles = getActiveByDefaultProfiles(availableProfiles, context, problems);
         }
         return activatedProfiles;
+    }
+
+    private boolean activatesActiveByDefault(ProfileActivationContext context) {
+        String activatesActiveByDefaultString = context.getProjectProperties().get(PropertyName.ACTIVATE_ACTIVE_BY_DEFAULT_PROFILES);
+        boolean activatesActiveByDefault = activatesActiveByDefaultString != null
+                && (activatesActiveByDefaultString.equals("true")
+                || activatesActiveByDefaultString.equals("yes"));
+        return activatesActiveByDefault;
     }
 
     List<Profile> getActivatedProfiles(Collection<Profile> availableProfiles, ProfileActivationContext context, ModelProblemCollector problems) {
@@ -86,15 +85,26 @@ public class StrongDefaultActivationProfileSelector implements ProfileSelector {
                 result.add(profile);
             }
         }
+        if (activatesActiveByDefault(context)) {
+            for (Profile profile : availableProfiles) {
+                if (!context.getInactiveProfileIds().contains(profile.getId())
+                        && isActiveByDefault(profile)
+                        && !result.contains(profile)) {
+                    result.add(profile);
+                }
+            }
+        }
         return result;
     }
 
     List<Profile> getActiveByDefaultProfiles(Collection<Profile> availableProfiles, ProfileActivationContext context, ModelProblemCollector problems) {
         List<Profile> result = new ArrayList<Profile>();
-        for (Profile profile : availableProfiles) {
-            if (!context.getInactiveProfileIds().contains(profile.getId())
-                    && isActiveByDefault(profile)) {
-                result.add(profile);
+        if (!activatesActiveByDefault(context)) {
+            for (Profile profile : availableProfiles) {
+                if (!context.getInactiveProfileIds().contains(profile.getId())
+                        && isActiveByDefault(profile)) {
+                    result.add(profile);
+                }
             }
         }
         return result;

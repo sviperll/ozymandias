@@ -6,10 +6,41 @@ Part of [ozymandias](https://github.com/sviperll/ozymandias).
 Tool to modularize maven build configuration by splitting it into
 a set of small inter-dependent profiles.
 
-Modularization is achieved with two features provided by this extension:
+Modularization is achieved with several features provided by this extension:
 
  * support for dependencies between different profiles in maven build.
  * a way to activate profiles provided by parent pom from current pom.
+ * a way to activate all `activeByDefault` profiles even if some other profiles
+   are activated
+
+Active by default profiles
+--------------------------
+
+These are default profiles configured with `activeByDefault` tag.
+There are two ways `activeByDefault` profiles works with profiledep extension.
+
+ 1. First one is maven default. `activeByDefault` profiles are activated
+    when _no other profiles are activated_ only.
+
+ 2. Second one is used to support better defaults. With the second way
+    `activeByDefault` profiles are _always_ activated. You must opt-in
+    for second way of `activeByDefault` processing. To enable it
+    you must add special `profile.activate.default` property to properties section of your pom.
+    Like this
+
+    ````xml
+        <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+            <modelVersion>4.0.0</modelVersion>
+            <groupId><!-- ... --></groupId>
+            <artifactId><!-- ... --></artifactId>
+            <version><!-- ... --></version>
+            <!-- ... -->
+            <properties>
+                <profile.activate.default>true</profile.activate.default>
+            </properties>
+            <!-- ... -->
+        </project>
+    ````
 
 This extension can be observed with maven-help-plugin.
 
@@ -27,16 +58,78 @@ The following profiles are active:
  - java6 (source: groupId:artifactId:version)
 ````
 
-These are default profiles configured with `activeByDefault` tag.
-Now when you specify profiles on command line, default profiles are not activated,
-but replaced with specified profiles. Here we should expect two profiles to be
-active.
+Now let's try to specify some other profile on command line.
 
 ````
-$ mvn '-Pjava7,bootclasspath' help:active-profiles
+$ mvn -P nexus-deploy help:active-profiles
 ````
 
-Instead 3 profiles are activated when this extension is enabled:
+When `profile.activate.default` is not specified in your pom
+and some other profiles are activated
+default profiles are not activated.
+
+````
+The following profiles are active:
+
+ - nexus-deploy (source: groupId:artifactId:version)
+````
+
+When `profile.activate.default` is enabled
+default profiles handling changes.
+
+````
+The following profiles are active:
+
+ - java6 (source: groupId:artifactId:version)
+ - nexus-deploy (source: groupId:artifactId:version)
+````
+
+With maven-profiledep-extension profiles can have dependencies and
+can conflict with each other.
+
+Suppose that `profile.activate.default` is enabled
+and you try to run
+
+````
+$ mvn -P java7 help:active-profiles
+````
+
+You will get following error:
+
+````
+[ERROR]   The project groupId:artifactId:version (/home/user/code/project) has 1 error
+[ERROR]     > ---.
+[ERROR]     >  `----Can't provide java-version
+[ERROR]     >     `----more than one profile provides it
+[ERROR]     >        |----java7
+[ERROR]     >        `----java6
+[ERROR]     @ groupId:artifactId:version
+[ERROR] 
+````
+
+The problem is that only one `java-version` can exists.
+To solve this problem you must explicitly deactivate some profile:
+
+````
+$ mvn -P '!java6,java7' help:active-profiles
+````
+
+````
+The following profiles are active:
+
+ - java7 (source: groupId:artifactId:version)
+````
+
+Profile dependencies
+--------------------
+
+Dependency information can cause additional profile activation.
+
+````
+$ mvn '-P!java6,java7,bootclasspath' help:active-profiles
+````
+
+3 profiles are activated:
 
 ````
 The following profiles are active:
@@ -47,15 +140,16 @@ The following profiles are active:
 ````
 
 Activation is based on dependency information. To specify that one profile
-depends on another you put special `profiledep` property into profile
-definition. `profiledep` is a list of comma separated profile ids.
-You can prepend exclamation mark (`!`) to profile id in `profiledep` list to
+depends on another you put special `profile.depends` property into profile
+definition. `profile.depends` is a list of comma separated profile ids,
+like the one you specify in command line.
+You can prepend exclamation mark (`!`) to profile id in `profile.depends` list to
 specify _conflicts-relationship_. When conflicting profiles are activated
 error is raised by this extension.
 
 Note that there is no `bootclasspath` profile in the above list.
 `bootclasspath` is a _virtual_ profile. A profile can provide any number
-of virtual profiles by specifying `profileprovide` property in profile
+of virtual profiles by specifying `profile.provides` property in profile
 definition. If more than one profile provides the same virtual profile
 only one is actually activated.
 
@@ -72,8 +166,8 @@ Here is an example of profile definitions:
         <profile>
             <id>java6-bootclasspath</id>
             <properties>
-                <profileprovide>bootclasspath</profileprovide>
-                <profiledep>java6,fork-javac</profiledep>
+                <profile.provides>bootclasspath</profile.provides>
+                <profile.depends>java6,fork-javac</profile.depends>
             </properties>
             <build>
                 <!-- ... -->
@@ -82,8 +176,8 @@ Here is an example of profile definitions:
         <profile>
             <id>java7-bootclasspath</id>
             <properties>
-                <profileprovide>bootclasspath</profileprovide>
-                <profiledep>java7,fork-javac</profiledep>
+                <profile.provides>bootclasspath</profile.provides>
+                <profile.depends>java7,fork-javac</profile.depends>
             </properties>
             <build>
                 <!-- ... -->
@@ -93,8 +187,8 @@ Here is an example of profile definitions:
         <profile>
             <id>java8-bootclasspath</id>
             <properties>
-                <profileprovide>bootclasspath</profileprovide>
-                <profiledep>java8,fork-javac</profiledep>
+                <profile.provides>bootclasspath</profile.provides>
+                <profile.depends>java8,fork-javac</profile.depends>
             </properties>
             <build>
                 <!-- ... -->
@@ -104,7 +198,7 @@ Here is an example of profile definitions:
         <profile>
             <id>java6</id>
             <properties>
-                <profileprovide>java-version</profileprovide>
+                <profile.provides>java-version</profile.provides>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -116,7 +210,7 @@ Here is an example of profile definitions:
         <profile>
             <id>java7</id>
             <properties>
-                <profileprovide>java-version</profileprovide>
+                <profile.provides>java-version</profile.provides>
             </properties>
             <build>
                 <!-- ... -->
@@ -125,7 +219,7 @@ Here is an example of profile definitions:
         <profile>
             <id>java8</id>
             <properties>
-                <profileprovide>java-version</profileprovide>
+                <profile.provides>java-version</profile.provides>
             </properties>
             <build>
                 <!-- ... -->
@@ -146,12 +240,13 @@ Here is an example of profile definitions:
 Profile dependencies work across single pom.xml file. You can't depend
 on profile from parent pom.
 
-Configuring profiles from pom.xml
+Activating profiles from pom.xml
 ---------------------------------
 
 You can declare a set of interdependent profiles in your parent pom
-and activate them in inherited pom. Special `activateparentprofiles` property is
-used for it.
+and activate them in inherited pom. Special `parent.profile.activate` property is
+used for it. This property is a list of profile IDs. It works just the same
+way you specify profiles in command line.
 
 ````xml
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -159,14 +254,14 @@ used for it.
     <parent>
         <groupId>com.github.sviperll</groupId>
         <artifactId>maven-parent</artifactId>
-        <version>0.6</version>
+        <version>0.7</version>
     </parent>
     <groupId>group</groupId>
     <artifactId>myartifact</artifactId>
     <version>version</version>
     <!-- ... -->
     <properties>
-        <activateparentprofiles>java6,nexus-deploy</activateparentprofiles>
+        <parent.profile.activate>java6,nexus-deploy</parent.profile.activate>
         <!-- ... -->
     </properties>
     <!-- ... -->
@@ -180,10 +275,10 @@ With such declaration given profiles are always activated when building
 Other profiles from `maven-parent` can be activated as
 required by profile dependencies.
 
-`activateparentprofiles` affects only profiles from parent pom
+`parent.profile.activate` affects only profiles from parent pom
 and parent of parent pom etc, but never affects current pom.
 
-`activateparentprofiles` can contain negative directives, like this:
+`parent.profile.activate` can contain negative directives, like this:
 
 ````xml
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -191,38 +286,34 @@ and parent of parent pom etc, but never affects current pom.
     <parent>
         <groupId>com.github.sviperll</groupId>
         <artifactId>maven-parent</artifactId>
-        <version>0.6</version>
+        <version>0.7</version>
     </parent>
     <groupId>group</groupId>
     <artifactId>myartifact</artifactId>
     <version>version</version>
     <!-- ... -->
     <properties>
-        <activateparentprofiles>java6,!mustache</activateparentprofiles>
+        <parent.profile.activate>java6,!mustache</parent.profile.activate>
         <!-- ... -->
     </properties>
     <!-- ... -->
 </project>
 ````
 
-In this example you can activate `mustache` profile from `myartifact` pom, like
-this:
+This means that `mustache` profile will not be activated in parent pom
+even if it is active by default or activated by some maven activation
+mechanism.
+
+But you can still activate this profile if you will
+list it in command line
 
 ````
 $ mvn -P mustache verify
 ````
 
-This command will activate `mustache` profile from `myartifact` pom, but
-never `mustache` profile from `myparent` pom.
-
-This can be used to override profile from parent pom, for example.
-
-Active by default profiles
---------------------------
-
-maven-profileddep-extension always try to activate all profiles
-marked as activeByDefault. Only those profiles that do not conflict with
-explicitly activated profiles are activated.
+Command line profile list has greater priority than `parent.profile.activate` list.
+In the same way `parent.profile.activate` list from inherited pom has
+greater priority then `parent.profile.activate` list from it's parent pom.
 
 Installation
 ------------
@@ -240,7 +331,7 @@ like this:
             <plugin>
                 <groupId>com.github.sviperll</groupId>
                 <artifactId>coreext-maven-plugin</artifactId>
-                <version>0.6</version>
+                <version>0.7</version>
                 <configuration>
                     <extensions combine.children="append">
                         <!-- ... -->
@@ -273,12 +364,12 @@ If you wish you can manually write `.mvn/extensions.xml` file like this:
   <extension>
     <groupId>com.github.sviperll</groupId>
     <artifactId>maven-profiledep-extension</artifactId>
-    <version>0.6</version>
+    <version>0.7</version>
   </extension>
 </extensions>
 ````
 
-Version 0.6 of maven-profiledep-extension is available from maven central.
+Version 0.7 of maven-profiledep-extension is available from maven central.
 No additional configuration is required.
 
 ### Older maven versions ###

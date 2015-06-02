@@ -24,14 +24,12 @@ import org.codehaus.plexus.logging.Logger;
 @Component(role = ProfileSelector.class)
 public class ConfiguringProfileSelector implements ProfileSelector {
     private final MultipleContextsProfileSelector instance;
-    private final Logger logger;
 
     // It's somewhat undocumented, but
     // Maven since 3.0 provides plexus implementation build on Google Guice
     // So we can directly use Guice's @Inject
     @Inject
     public ConfiguringProfileSelector(final Logger logger, List<ProfileActivator> activators) {
-        this.logger = logger;
         setJavaLoggersRootHandler(new PlexusLoggingHandler(logger));
         StrongDefaultActivationProfileSelector defaultProfileSelector = new StrongDefaultActivationProfileSelector(activators);
         DependenciesProfileSelector dependenciesProfileSelector = new DependenciesProfileSelector(defaultProfileSelector);

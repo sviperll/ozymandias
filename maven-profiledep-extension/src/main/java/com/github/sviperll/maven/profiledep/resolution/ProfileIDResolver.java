@@ -32,6 +32,10 @@ class ProfileIDResolver {
         return availableProfiles;
     }
 
+    boolean canResolve() {
+        return !unresolvedProfileIDs.isEmpty() || !ambigousProfileIDs.isEmpty();
+    }
+
     void include(ProfileIDResolver resolver) {
         unresolvedProfileIDs.addAll(resolver.unresolvedProfileIDs);
         unresolvableProfileIDs.addAll(resolver.unresolvableProfileIDs);

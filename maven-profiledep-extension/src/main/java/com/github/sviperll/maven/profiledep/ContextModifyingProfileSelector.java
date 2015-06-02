@@ -95,7 +95,7 @@ public class ContextModifyingProfileSelector implements ProfileSelector {
     static class Factory implements ProfileSelectorFactory {
         private final DependenciesProfileSelector profileSelector;
 
-        public Factory(DependenciesProfileSelector profileSelector) {
+        Factory(DependenciesProfileSelector profileSelector) {
             this.profileSelector = profileSelector;
         }
 
