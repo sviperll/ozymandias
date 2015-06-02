@@ -16,17 +16,16 @@ Modularization is achieved with several features provided by this extension:
 Active by default profiles
 --------------------------
 
-These are default profiles configured with `activeByDefault` tag.
-There are two ways `activeByDefault` profiles works with profiledep extension.
+Default profiles configured with `activeByDefault` tag.
+There are two ways `activeByDefault` profiles work with profiledep extension.
 
- 1. First one is maven default. `activeByDefault` profiles are activated
-    when _no other profiles are activated_ only.
+ 1. First one duplicates maven behaviour without extensions.
+    `activeByDefault` profiles are activated when _no other profiles are activated_ only.
 
- 2. Second one is used to support better defaults. With the second way
-    `activeByDefault` profiles are _always_ activated. You must opt-in
-    for second way of `activeByDefault` processing. To enable it
-    you must add special `profile.activate.default` property to properties section of your pom.
-    Like this
+ 2. With the second way `activeByDefault` profiles are _always_ activated.
+    You must opt-in for second way of `activeByDefault` processing.
+    To enable it you must add special `profile.activate.default` property to
+    properties section of your pom. Like this
 
     ````xml
         <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -76,6 +75,7 @@ The following profiles are active:
 
 When `profile.activate.default` is enabled
 default profiles handling changes.
+`activeByDefault` profiles are activated nevertheless.
 
 ````
 The following profiles are active:
@@ -94,7 +94,7 @@ and you try to run
 $ mvn -P java7 help:active-profiles
 ````
 
-You will get following error:
+You will get the following error:
 
 ````
 [ERROR]   The project groupId:artifactId:version (/home/user/code/project) has 1 error
@@ -107,7 +107,7 @@ You will get following error:
 [ERROR] 
 ````
 
-The problem is that only one `java-version` can exists.
+The problem is that only one `java-version` can exist.
 To solve this problem you must explicitly deactivate some profile:
 
 ````
@@ -270,7 +270,7 @@ way you specify profiles in command line.
 
 `java6` and `nexus-deploy` are two profiles defined in
 `maven-parent` pom.
-With such declaration given profiles are always activated when building
+With such declaration given profiles are activated when building
 `myartifact`.
 Other profiles from `maven-parent` can be activated as
 required by profile dependencies.
@@ -304,8 +304,7 @@ This means that `mustache` profile will not be activated in parent pom
 even if it is active by default or activated by some maven activation
 mechanism.
 
-But you can still activate this profile if you will
-list it in command line
+You can still activate this profile if you list it in command line
 
 ````
 $ mvn -P mustache verify
