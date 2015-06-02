@@ -13,10 +13,12 @@ Modularization is achieved with several features provided by this extension:
  * a way to activate all `activeByDefault` profiles even if some other profiles
    are activated
 
+See [maven-parent](https://github.com/sviperll/ozymandias/tree/master/maven-parent) project for example of `maven-profiledep-extension` usage.
+
 Active by default profiles
 --------------------------
 
-Default profiles configured with `activeByDefault` tag.
+Maven provides `activeByDefault` activation tag for profiles.
 There are two ways `activeByDefault` profiles work with profiledep extension.
 
  1. First one duplicates maven behaviour without extensions.
@@ -337,7 +339,7 @@ like this:
                         <extension>
                             <groupId>com.github.sviperll</groupId>
                             <artifactId>maven-profiledep-extension</artifactId>
-                            <version>${project.version}</version>
+                            <version>0.7</version>
                         </extension>
                         <!-- ... -->
                     </extensions>
