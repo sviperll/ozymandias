@@ -32,7 +32,6 @@ package com.github.sviperll.maven.profiledep;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.maven.model.Activation;
 import org.apache.maven.model.Profile;
@@ -57,11 +56,10 @@ public class StrongDefaultActivationProfileSelector implements ProfileSelector {
 
     @Override
     public List<Profile> getActiveProfiles(Collection<Profile> availableProfiles, ProfileActivationContext context, ModelProblemCollector problems) {
-        logger.log(Level.FINE, "{0}.getActiveProfiles(?, '{'inactiveProfileIds = {1}, activeProfileIds = {2}'}', ?)", new Object[] {StrongDefaultActivationProfileSelector.class.getSimpleName(), context.getInactiveProfileIds(), context.getActiveProfileIds()});
         List<Profile> activatedProfiles = getActivatedProfiles(availableProfiles, context, problems);
         if (activatedProfiles.isEmpty()) {
             // Default profiles are activated only if nothing else is activated
-            // This behaviour is the same as DefaultProfileSelector
+            // This repeats normal maven behaviour
 
             activatedProfiles = getActiveByDefaultProfiles(availableProfiles, context, problems);
         }

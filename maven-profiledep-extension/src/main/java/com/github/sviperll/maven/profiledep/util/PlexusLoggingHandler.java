@@ -49,7 +49,11 @@ public class PlexusLoggingHandler extends Handler {
     @Override
     public void publish(LogRecord record) {
         Level level = record.getLevel();
-        String message = MessageFormat.format(record.getMessage(), record.getParameters());
+        String message = record.getMessage();
+        Object[] parameters = record.getParameters();
+        if (parameters != null && parameters.length > 0 && message.contains("{0")) {
+            message = MessageFormat.format(message, parameters);
+        }
         Throwable throwable = record.getThrown();
         if (level.equals(Level.CONFIG)) {
             if (throwable != null) {

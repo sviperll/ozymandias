@@ -8,6 +8,7 @@ package com.github.sviperll.maven.profiledep;
 import com.github.sviperll.maven.profiledep.util.PlexusLoggingHandler;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
 import javax.inject.Inject;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.building.ModelProblemCollector;
@@ -24,32 +25,41 @@ import org.codehaus.plexus.logging.Logger;
 @Component(role = ProfileSelector.class)
 public class ConfiguringProfileSelector implements ProfileSelector {
     private final MultipleContextsProfileSelector instance;
+    private final Logger logger;
 
     // It's somewhat undocumented, but
     // Maven since 3.0 provides plexus implementation build on Google Guice
     // So we can directly use Guice's @Inject
     @Inject
-    public ConfiguringProfileSelector(final Logger logger, List<ProfileActivator> activators) {
-        setJavaLoggersRootHandler(new PlexusLoggingHandler(logger));
+    public ConfiguringProfileSelector(Logger logger, List<ProfileActivator> activators) {
         StrongDefaultActivationProfileSelector defaultProfileSelector = new StrongDefaultActivationProfileSelector(activators);
         DependenciesProfileSelector dependenciesProfileSelector = new DependenciesProfileSelector(defaultProfileSelector);
         ContextModifyingProfileSelector.Factory factory = new ContextModifyingProfileSelector.Factory(dependenciesProfileSelector);
         instance = new MultipleContextsProfileSelector(factory);
-    }
-
-    private void setJavaLoggersRootHandler(java.util.logging.Handler handler) throws SecurityException {
-        java.util.logging.Logger javaLogger = java.util.logging.Logger.getLogger("");
-        java.util.logging.Handler[] handlers = javaLogger.getHandlers();
-        for (java.util.logging.Handler anyHandler: handlers)
-            javaLogger.removeHandler(anyHandler);
-        handler.setLevel(java.util.logging.Level.ALL);
-        javaLogger.addHandler(handler);
-        javaLogger.setLevel(java.util.logging.Level.ALL);
-        javaLogger.setUseParentHandlers(false);
+        this.logger = logger;
     }
 
     @Override
     public List<Profile> getActiveProfiles(Collection<Profile> profiles, ProfileActivationContext context, ModelProblemCollector problems) {
-        return instance.getActiveProfiles(profiles, context, problems);
+        java.util.logging.Logger javaLogger = java.util.logging.Logger.getLogger("");
+        java.util.logging.Handler[] handlers = javaLogger.getHandlers();
+        for (java.util.logging.Handler anyHandler: handlers)
+            javaLogger.removeHandler(anyHandler);
+        java.util.logging.Handler handler = new PlexusLoggingHandler(logger);
+        handler.setLevel(java.util.logging.Level.ALL);
+        javaLogger.addHandler(handler);
+        Level level = javaLogger.getLevel();
+        javaLogger.setLevel(java.util.logging.Level.ALL);
+        boolean useParentHandlers = javaLogger.getUseParentHandlers();
+        javaLogger.setUseParentHandlers(false);
+        try {
+            return instance.getActiveProfiles(profiles, context, problems);
+        } finally {
+            javaLogger.removeHandler(handler);
+            javaLogger.setUseParentHandlers(useParentHandlers);
+            javaLogger.setLevel(level);
+            for (java.util.logging.Handler anyHandler: handlers)
+                javaLogger.addHandler(anyHandler);
+        }
     }
 }

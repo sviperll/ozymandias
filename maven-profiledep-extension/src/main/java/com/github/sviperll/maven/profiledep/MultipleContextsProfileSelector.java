@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.building.ModelProblemCollector;
@@ -60,7 +59,6 @@ public class MultipleContextsProfileSelector implements ProfileSelector {
 
     @Override
     public List<Profile> getActiveProfiles(Collection<Profile> profiles, ProfileActivationContext context, ModelProblemCollector problems) {
-        logger.log(Level.FINE, "{0}.getActiveProfiles(?, {1}, ?)", new Object[] {MultipleContextsProfileSelector.class.getSimpleName(), context});
         ProfileSelector selector = selectors.get(context);
         if (selector == null) {
             selector = factory.createProfileSelector();

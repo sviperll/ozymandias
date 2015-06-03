@@ -32,6 +32,9 @@ public class DependenciesProfileSelector implements ProfileSelector {
         activation.activate(activatedProfiles);
         activation.resolve();
         if (!activation.isError() && activation.activeProfiles().isEmpty()) {
+            // Default profiles are activated only if nothing else is activated
+            // This repeats normal maven behaviour
+
             activatedProfiles = defaultProfileSelector.getActiveByDefaultProfiles(availableProfiles, context, problems);
             activation.activate(activatedProfiles);
             activation.resolve();
