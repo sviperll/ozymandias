@@ -37,7 +37,7 @@ Configuration example
             <plugin>
                 <groupId>com.github.sviperll</groupId>
                 <artifactId>versioning-maven-plugin</artifactId>
-                <version>0.6</version>
+                <version>0.7</version>
                 <inherited>false</inherited>
                 <configuration>
                     <!-- Version to use. ${project.version} is default. -->
@@ -128,7 +128,7 @@ Below is the full configuration used to achieve described behavior.
             <plugin>
                 <groupId>com.github.sviperll</groupId>
                 <artifactId>versioning-maven-plugin</artifactId>
-                <version>0.6</version>
+                <version>0.7</version>
                 <configuration>
                     <version>${project.version}</version>
                     <decidedVersionPropertyName>release.version</decidedVersionPropertyName>

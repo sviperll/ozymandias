@@ -3,11 +3,11 @@
     <parent>
         <groupId>com.github.sviperll</groupId>
         <artifactId>ozymandias</artifactId>
-        <version>0.6-successor-SNAPSHOT</version>
+        <version>0.7</version>
     </parent>
     <groupId>com.github.sviperll</groupId>
     <artifactId>maven-parent</artifactId>
-    <version>0.6-successor-SNAPSHOT</version>
+    <version>0.7</version>
     <packaging>pom</packaging>
     <name>maven-parent</name>
     <description>Artifact to use as universal maven parent</description>
@@ -120,13 +120,13 @@
                 <plugin>
                     <groupId>com.github.sviperll</groupId>
                     <artifactId>coreext-maven-plugin</artifactId>
-                    <version>0.6-successor-SNAPSHOT</version>
+                    <version>0.7</version>
                     <configuration>
                         <extensions combine.children="append">
                             <extension>
                                 <groupId>com.github.sviperll</groupId>
                                 <artifactId>maven-profiledep-extension</artifactId>
-                                <version>0.6-successor-SNAPSHOT</version>
+                                <version>0.7</version>
                             </extension>
                         </extensions>
                     </configuration>
