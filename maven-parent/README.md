@@ -6,7 +6,7 @@ Part of [ozymandias](https://github.com/sviperll/ozymandias).
 Usage
 -----
 
-Set `maven-parent` as parent project and activate required profiles with `activateparentprofiles` property.
+Set `maven-parent` as parent project and activate required profiles with `parent.profile.activate` property.
 Profile activation is implemented with [maven-profiledep-extension](https://github.com/sviperll/ozymandias/tree/master/maven-profiledep-extension)
 
 ```xml
@@ -22,7 +22,7 @@ Profile activation is implemented with [maven-profiledep-extension](https://gith
     <version>version</version>
     <!-- ... -->
     <properties>
-        <activateparentprofiles>java6,nexus-deploy</activateparentprofiles>
+        <parent.profile.activate>java6,nexus-deploy</parent.profile.activate>
         <!-- ... -->
     </properties>
     <!-- ... -->
