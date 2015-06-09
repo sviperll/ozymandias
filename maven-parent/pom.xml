@@ -606,12 +606,13 @@
                                     <goal>copy-dependencies</goal>
                                 </goals>
                                 <configuration>
+                                    <includeScope>runtime</includeScope>
+                                    <excludeScope>provided</excludeScope>
                                     <excludeTransitive>false</excludeTransitive>
                                     <outputDirectory>${project.build.directory}/lib</outputDirectory>
                                     <overWriteIfNewer>true</overWriteIfNewer>
                                     <overWriteReleases>false</overWriteReleases>
                                     <overWriteSnapshots>true</overWriteSnapshots>
-                                    <includeScope>test</includeScope>
                                 </configuration>
                             </execution>
                         </executions>
