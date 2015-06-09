@@ -3,11 +3,11 @@
     <parent>
         <groupId>com.github.sviperll</groupId>
         <artifactId>ozymandias</artifactId>
-        <version>0.7</version>
+        <version>0.7-successor-SNAPSHOT</version>
     </parent>
     <groupId>com.github.sviperll</groupId>
     <artifactId>maven-profiledep-extension</artifactId>
-    <version>0.7</version>
+    <version>0.7-successor-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>maven-profiledep-extension</name>
     <description>Allow interdependencies between maven profiles</description>
