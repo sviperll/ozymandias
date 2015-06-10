@@ -31,7 +31,7 @@ public class CheckCoreextMojo extends CoreextMojo {
         } catch (FileNotFoundException ex) {
             extensionsObject = new Extensions();
         } catch (JAXBException ex) {
-            throw new MojoFailureException("\nCorrupted .mvn/extensions.xml file.\n\nRun\n    mvn coreext:install\nto overwrite this file", ex);
+            throw new MojoFailureException("\nCorrupted .mvn/extensions.xml file.\n\nRun\n    mvn com.github.sviperll:coreext-maven-plugin:install\nto overwrite this file", ex);
         }
         if (extensionsObject.extensions == null)
             extensionsObject.extensions = new ArrayList<Extension>();
@@ -43,7 +43,7 @@ public class CheckCoreextMojo extends CoreextMojo {
             for (Extension extension: uninstalledExtensions) {
                 message.append(" * ").append(extension).append("\n");
             }
-            message.append("\nRun\n\n    mvn coreext:install\n\nto install missing core extensions");
+            message.append("\nRun\n\n    mvn com.github.sviperll:coreext-maven-plugin:install\n\nto install missing core extensions");
             throw new MojoFailureException(message.toString());
         }
         Map<Extension, String> differentInstalledVersions = processor.getDifferentInstalledVersions(this.extensions);
@@ -54,7 +54,7 @@ public class CheckCoreextMojo extends CoreextMojo {
                 message.append(" * ").append(entry.getKey().groupId).append(":").append(entry.getKey().artifactId);
                 message.append(": ").append(entry.getKey().version).append(" required, but ").append(entry.getValue()).append(" installed");
             }
-            message.append("\nRun\n\n    mvn coreext:install\n\nto install correct core extensions versions");
+            message.append("\nRun\n\n    mvn com.github.sviperll:coreext-maven-plugin:install\n\nto install correct core extensions versions");
             throw new MojoFailureException(message.toString());
         }
     }
