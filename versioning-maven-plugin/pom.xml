@@ -3,11 +3,11 @@
     <parent>
         <groupId>com.github.sviperll</groupId>
         <artifactId>ozymandias</artifactId>
-        <version>0.7-successor-SNAPSHOT</version>
+        <version>0.8</version>
     </parent>
     <groupId>com.github.sviperll</groupId>
     <artifactId>versioning-maven-plugin</artifactId>
-    <version>0.7-successor-SNAPSHOT</version>
+    <version>0.8</version>
     <packaging>maven-plugin</packaging>
     <name>versioning-maven-plugin</name>
     <description>Support versioning policy</description>
