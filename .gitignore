@@ -1,3 +1,5 @@
+/.mvn/extensions.xml
+/*/.mvn/extensions.xml
 /target
 /*/target
 *~
