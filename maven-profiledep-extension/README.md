@@ -10,8 +10,7 @@ Modularization is achieved with several features provided by this extension:
 
  * support for dependencies between different profiles in maven build.
  * a way to activate profiles provided by parent pom from current pom.
- * a way to activate all `activeByDefault` profiles even if some other profiles
-   are activated
+ * a way to make profile always activate, except when explicitly deactivated
 
 See [maven-parent](https://github.com/sviperll/ozymandias/tree/master/maven-parent) project for example of `maven-profiledep-extension` usage.
 
@@ -19,29 +18,9 @@ Active by default profiles
 --------------------------
 
 Maven provides `activeByDefault` activation tag for profiles.
-There are two ways `activeByDefault` profiles work with profiledep extension.
+The way `activeByDefault` works is confusing and it's a best practice to avoid `activeByDefault`.
 
- 1. First one duplicates maven behaviour without extensions.
-    `activeByDefault` profiles are activated when _no other profiles are activated_ only.
-
- 2. With the second way `activeByDefault` profiles are _always_ activated.
-    You must opt-in for second way of `activeByDefault` processing.
-    To enable it you must add special `profile.activate.default` property to
-    properties section of your pom. Like this
-
-    ````xml
-        <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-            <modelVersion>4.0.0</modelVersion>
-            <groupId><!-- ... --></groupId>
-            <artifactId><!-- ... --></artifactId>
-            <version><!-- ... --></version>
-            <!-- ... -->
-            <properties>
-                <profile.activate.default>true</profile.activate.default>
-            </properties>
-            <!-- ... -->
-        </project>
-    ````
+Profiledep instead provides `profile.active' property to make profile always active.
 
 This extension can be observed with maven-help-plugin.
 
@@ -59,25 +38,25 @@ The following profiles are active:
  - java6 (source: groupId:artifactId:version)
 ````
 
+`Java6` profile is active because it is marked with `profile.active` property.
+Like this
+
+````xml
+    <profile>
+        <id>java6</id>
+        <properties>
+            <profile.active>true</profile.active>
+        </properties>
+    </profile>
+````
+
 Now let's try to specify some other profile on command line.
 
 ````
 $ mvn -P nexus-deploy help:active-profiles
 ````
 
-When `profile.activate.default` is not specified in your pom
-and some other profiles are activated
-default profiles are not activated.
-
-````
-The following profiles are active:
-
- - nexus-deploy (source: groupId:artifactId:version)
-````
-
-When `profile.activate.default` is enabled
-default profiles handling changes.
-`activeByDefault` profiles are activated nevertheless.
+The following output is produced. 
 
 ````
 The following profiles are active:
@@ -85,6 +64,13 @@ The following profiles are active:
  - java6 (source: groupId:artifactId:version)
  - nexus-deploy (source: groupId:artifactId:version)
 ````
+
+Note that `java6` profile is activated even so some
+other profile is activated. This behavior differs from
+maven's `activeByDefault` handling.
+
+You should probably always use `profile.active` property
+instead of `activeByDefault` since it's behavior is less confusing.
 
 With maven-profiledep-extension profiles can have dependencies and
 can conflict with each other.
@@ -201,10 +187,8 @@ Here is an example of profile definitions:
             <id>java6</id>
             <properties>
                 <profile.provides>java-version</profile.provides>
+                <profile.active>true</profile.active>
             </properties>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <build>
                 <!-- ... -->
             </build>
@@ -256,7 +240,7 @@ way you specify profiles in command line.
     <parent>
         <groupId>com.github.sviperll</groupId>
         <artifactId>maven-parent</artifactId>
-        <version>0.7</version>
+        <version>0.9</version>
     </parent>
     <groupId>group</groupId>
     <artifactId>myartifact</artifactId>
@@ -288,7 +272,7 @@ and parent of parent pom etc, but never affects current pom.
     <parent>
         <groupId>com.github.sviperll</groupId>
         <artifactId>maven-parent</artifactId>
-        <version>0.7</version>
+        <version>0.9</version>
     </parent>
     <groupId>group</groupId>
     <artifactId>myartifact</artifactId>
@@ -332,14 +316,14 @@ like this:
             <plugin>
                 <groupId>com.github.sviperll</groupId>
                 <artifactId>coreext-maven-plugin</artifactId>
-                <version>0.7</version>
+                <version>0.9</version>
                 <configuration>
                     <extensions combine.children="append">
                         <!-- ... -->
                         <extension>
                             <groupId>com.github.sviperll</groupId>
                             <artifactId>maven-profiledep-extension</artifactId>
-                            <version>0.7</version>
+                            <version>0.9</version>
                         </extension>
                         <!-- ... -->
                     </extensions>
@@ -365,12 +349,12 @@ If you wish you can manually write `.mvn/extensions.xml` file like this:
   <extension>
     <groupId>com.github.sviperll</groupId>
     <artifactId>maven-profiledep-extension</artifactId>
-    <version>0.7</version>
+    <version>0.9</version>
   </extension>
 </extensions>
 ````
 
-Version 0.7 of maven-profiledep-extension is available from maven central.
+Version 0.9 of maven-profiledep-extension is available from maven central.
 No additional configuration is required.
 
 ### Older maven versions ###

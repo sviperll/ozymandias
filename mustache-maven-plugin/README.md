@@ -43,7 +43,7 @@ Executions example
             <plugin>
                 <groupId>com.github.sviperll</groupId>
                 <artifactId>mustache-maven-plugin</artifactId>
-                <version>0.7</version>
+                <version>0.9</version>
                 <inherited>false</inherited>
                 <configuration>
                     <!-- encoding for reading and writing files -->
