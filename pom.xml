@@ -13,6 +13,7 @@
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
         <maven-source-plugin.version>2.4</maven-source-plugin.version>
         <maven-javadoc-plugin.version>2.10.1</maven-javadoc-plugin.version>
+        <maven-site-plugin.version>3.4</maven-site-plugin.version>
         <java.version>1.6</java.version>
         <netbeans.hint.license>BSD3</netbeans.hint.license>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -81,6 +82,11 @@
                 <configuration>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>${maven-site-plugin.version}</version>
             </plugin>
         </plugins>
     </build>
