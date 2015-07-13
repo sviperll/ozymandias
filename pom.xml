@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.sviperll</groupId>
     <artifactId>ozymandias</artifactId>
-    <version>0.9</version>
+    <version>0.9-successor-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>ozymandias</name>
     <description>Collection of maven extensions, plugins and generally usefull artifacts</description>
