@@ -13,13 +13,21 @@
     <url>https://github.com/sviperll/ozymandias/tree/master/maven-parent</url>
     <properties>
         <profile.activate.default>true</profile.activate.default>
+        <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
+        <maven-resources-plugin.version>2.6</maven-resources-plugin.version>
+        <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+        <maven-source-plugin.version>2.6</maven-source-plugin.version>
+        <maven-javadoc-plugin.version>2.10.1</maven-javadoc-plugin.version>
+        <pitest-maven.version>1.1.5</pitest-maven.version>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <reporting>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.1</version>
+                <version>${maven-javadoc-plugin.version}</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -35,7 +43,7 @@
             <plugin>
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
-                <version>1.1.6</version>
+                <version>${pitest-maven.version}</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -70,6 +78,40 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <!-- 2.2 ,2.3 and 2.4 doesn't work with git -->
+                    <version>2.5.2</version>
+                    <configuration>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <useReleaseProfile>false</useReleaseProfile>
+                        <arguments>-Prelease-profile</arguments>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.pitest</groupId>
+                    <artifactId>pitest-maven</artifactId>
+                    <version>${pitest-maven.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>${maven-source-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>${maven-javadoc-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>${maven-gpg-plugin.version}</version>
+                    <configuration>
+                        <passphraseServerId>gpg</passphraseServerId>
+                    </configuration>
+                </plugin>
+                <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>findbugs-maven-plugin</artifactId>
                     <version>3.0.1</version>
@@ -91,7 +133,7 @@
                 <plugin>
                     <groupId>io.takari.maven.plugins</groupId>
                     <artifactId>takari-lifecycle-plugin</artifactId>
-                    <version>1.11.6</version>
+                    <version>1.11.7</version>
                     <configuration>
                         <accessRulesViolation>error</accessRulesViolation>
                         <encoding>${project.build.sourceEncoding}</encoding>
@@ -102,6 +144,9 @@
                         <compilerId>javac</compilerId><!-- <compilerId>jdt</compilerId> -->
                         <proc>proc</proc>
                         <encoding>${project.build.sourceEncoding}</encoding>
+
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
 
                         <verbose>false</verbose>
                         <showDeprecation>true</showDeprecation>
@@ -114,7 +159,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.1</version>
+                    <version>${maven-compiler-plugin.version}</version>
                     <configuration>
                         <encoding>${project.build.sourceEncoding}</encoding>
 
@@ -127,6 +172,9 @@
                         <forceJavacCompilerUse>false</forceJavacCompilerUse>
                         <useIncrementalCompilation>true</useIncrementalCompilation>
                         <fork>false</fork>
+
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
 
                         <verbose>false</verbose>
                         <showDeprecation>true</showDeprecation>
@@ -144,7 +192,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>2.6</version>
+                    <version>${maven-resources-plugin.version}</version>
                     <configuration>
                         <encoding>${project.build.sourceEncoding}</encoding>
                     </configuration>
@@ -270,6 +318,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
+                <configuration>
+                    <rules>
+                        <requireMavenVersion>
+                            <version>(,2.1.0),(2.1.0,2.2.0),(2.2.0,)</version>
+                            <message>Maven 2.1.0 and 2.2.0 produce incorrect GPG signatures and checksums respectively.</message>
+                        </requireMavenVersion>
+                    </rules>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>com.github.sviperll</groupId>
@@ -344,79 +400,22 @@
             </activation>
             <properties>
                 <profile.provides>java-version</profile.provides>
+                <java.version>1.6</java.version>
             </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <source>1.6</source>
-                            <target>1.6</target>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>io.takari.maven.plugins</groupId>
-                        <artifactId>takari-lifecycle-plugin</artifactId>
-                        <configuration>
-                            <source>1.6</source>
-                            <target>1.6</target>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
         <profile>
             <id>java7</id>
             <properties>
                 <profile.provides>java-version</profile.provides>
+                <java.version>1.7</java.version>
             </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <source>1.7</source>
-                            <target>1.7</target>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>io.takari.maven.plugins</groupId>
-                        <artifactId>takari-lifecycle-plugin</artifactId>
-                        <configuration>
-                            <source>1.7</source>
-                            <target>1.7</target>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
         <profile>
             <id>java8</id>
             <properties>
                 <profile.provides>java-version</profile.provides>
+                <java.version>1.8</java.version>
             </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <source>1.8</source>
-                            <target>1.8</target>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>io.takari.maven.plugins</groupId>
-                        <artifactId>takari-lifecycle-plugin</artifactId>
-                        <configuration>
-                            <source>1.8</source>
-                            <target>1.8</target>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
 
         <!--
@@ -639,7 +638,7 @@
         <profile>
             <id>executable</id>
             <properties>
-                <profile.depends>has-main-class,!deploy-to-maven-repository,bin-with-dependencies</profile.depends>
+                <profile.depends>has-main-class,bin-with-dependencies</profile.depends>
             </properties>
         </profile>
         <profile>
@@ -726,6 +725,9 @@
                                     <goal>analyze-only</goal>
                                 </goals>
                                 <phase>process-test-classes</phase>
+                                <configuration>
+                                    <ignoreNonCompile>true</ignoreNonCompile>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -743,7 +745,6 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
                         <configuration>
-                            <ignoreNonCompile>true</ignoreNonCompile>
                             <failOnWarning>true</failOnWarning>
                         </configuration>
                     </plugin>
@@ -782,6 +783,116 @@
             <properties>
                 <profile.depends>strict-dependencies-usage,enforce-dependencies-versions</profile.depends>
             </properties>
+        </profile>
+        <profile>
+            <id>release-profile</id>
+            <properties>
+                <profile.depends>bootclasspath,attach-sources,attach-javadocs,sign-artifacts</profile.depends>
+            </properties>
+        </profile>
+        <profile>
+            <id>attach-sources</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>attach-javadocs</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>sign-artifacts</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>findbugs-check</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>findbugs-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>findbugs-check</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>pitest-cover</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <executions>
+                            <execution>
+                                <id>pitest-cover</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>mutationCoverage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>
