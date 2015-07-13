@@ -3,11 +3,11 @@
     <parent>
         <groupId>com.github.sviperll</groupId>
         <artifactId>ozymandias</artifactId>
-        <version>0.9-successor-SNAPSHOT</version>
+        <version>0.10</version>
     </parent>
     <groupId>com.github.sviperll</groupId>
     <artifactId>coreext-maven-plugin</artifactId>
-    <version>0.9-successor-SNAPSHOT</version>
+    <version>0.10</version>
     <packaging>maven-plugin</packaging>
     <name>coreext-maven-plugin</name>
     <description>Check and install maven core extensions</description>

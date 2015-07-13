@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.github.sviperll</groupId>
         <artifactId>ozymandias</artifactId>
-        <version>0.9-successor-SNAPSHOT</version>
+        <version>0.10</version>
     </parent>
     <groupId>com.github.sviperll</groupId>
     <artifactId>maven-parent</artifactId>
@@ -219,13 +219,13 @@
                 <plugin>
                     <groupId>com.github.sviperll</groupId>
                     <artifactId>coreext-maven-plugin</artifactId>
-                    <version>0.9-successor-SNAPSHOT</version>
+                    <version>0.10</version>
                     <configuration>
                         <extensions combine.children="append">
                             <extension>
                                 <groupId>com.github.sviperll</groupId>
                                 <artifactId>maven-profiledep-extension</artifactId>
-                                <version>0.9</version>
+                                <version>0.10</version>
                             </extension>
                         </extensions>
                     </configuration>

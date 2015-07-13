@@ -28,10 +28,10 @@ Error message will be raised if some core extensions are missing when
 For example:
 
 ````
-[ERROR] Failed to execute goal com.github.sviperll:coreext-maven-plugin:0.9:check (default-cli) on project maven-parent:
+[ERROR] Failed to execute goal com.github.sviperll:coreext-maven-plugin:0.10:check (default-cli) on project maven-parent:
 [ERROR] Some required core extensions are not installed:
 [ERROR] 
-[ERROR] * com.github.sviperll:maven-profiledep-extension:0.9
+[ERROR] * com.github.sviperll:maven-profiledep-extension:0.10
 [ERROR] 
 [ERROR] Run
 [ERROR] 
@@ -55,7 +55,7 @@ that all your projects have required core extensions installed.
             <plugin>
                 <groupId>com.github.sviperll</groupId>
                 <artifactId>coreext-maven-plugin</artifactId>
-                <version>0.9</version>
+                <version>0.10</version>
                 <configuration>
                     <!-- Required core extensions: -->
                     <extensions combine.children="append">
