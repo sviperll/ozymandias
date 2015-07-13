@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.github.sviperll</groupId>
         <artifactId>ozymandias</artifactId>
-        <version>0.8-successor-SNAPSHOT</version>
+        <version>0.9-SNAPSHOT</version>
     </parent>
     <groupId>com.github.sviperll</groupId>
     <artifactId>maven-parent</artifactId>
@@ -12,11 +12,10 @@
     <description>Artifact to use as universal maven parent</description>
     <url>https://github.com/sviperll/ozymandias/tree/master/maven-parent</url>
     <properties>
-        <profile.activate.default>true</profile.activate.default>
         <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
         <maven-resources-plugin.version>2.6</maven-resources-plugin.version>
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
-        <maven-source-plugin.version>2.6</maven-source-plugin.version>
+        <maven-source-plugin.version>2.4</maven-source-plugin.version>
         <maven-javadoc-plugin.version>2.10.1</maven-javadoc-plugin.version>
         <pitest-maven.version>1.1.5</pitest-maven.version>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -219,13 +218,13 @@
                 <plugin>
                     <groupId>com.github.sviperll</groupId>
                     <artifactId>coreext-maven-plugin</artifactId>
-                    <version>0.8-successor-SNAPSHOT</version>
+                    <version>0.9-SNAPSHOT</version>
                     <configuration>
                         <extensions combine.children="append">
                             <extension>
                                 <groupId>com.github.sviperll</groupId>
                                 <artifactId>maven-profiledep-extension</artifactId>
-                                <version>0.8</version>
+                                <version>0.9-SNAPSHOT</version>
                             </extension>
                         </extensions>
                     </configuration>
@@ -349,11 +348,9 @@
     <profiles>
         <profile>
             <id>maven-compiler-plugin-compile</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <properties>
                 <profile.provides>java-compiler-plugin</profile.provides>
+                <profile.active>true</profile.active>
             </properties>
         </profile>
         <profile>
@@ -395,11 +392,9 @@
         </profile>
         <profile>
             <id>java6</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <properties>
                 <profile.provides>java-version</profile.provides>
+                <profile.active>true</profile.active>
                 <java.version>1.6</java.version>
             </properties>
         </profile>
@@ -710,9 +705,9 @@
         </profile>
         <profile>
             <id>analyze-dependencies</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
+            <properties>
+                <profile.active>true</profile.active>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -777,10 +772,8 @@
         </profile>
         <profile>
             <id>strict-dependencies</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <properties>
+                <profile.active>true</profile.active>
                 <profile.depends>strict-dependencies-usage,enforce-dependencies-versions</profile.depends>
             </properties>
         </profile>
@@ -850,9 +843,9 @@
         </profile>
         <profile>
             <id>findbugs-check</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
+            <properties>
+                <profile.active>true</profile.active>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -873,9 +866,9 @@
         </profile>
         <profile>
             <id>pitest-cover</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
+            <properties>
+                <profile.active>true</profile.active>
+            </properties>
             <build>
                 <plugins>
                     <plugin>

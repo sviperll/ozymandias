@@ -66,14 +66,6 @@ public class StrongDefaultActivationProfileSelector implements ProfileSelector {
         return activatedProfiles;
     }
 
-    private boolean activatesActiveByDefault(ProfileActivationContext context) {
-        String activatesActiveByDefaultString = context.getProjectProperties().get(PropertyName.ACTIVATE_ACTIVE_BY_DEFAULT_PROFILES);
-        boolean activatesActiveByDefault = activatesActiveByDefaultString != null
-                && (activatesActiveByDefaultString.equals("true")
-                || activatesActiveByDefaultString.equals("yes"));
-        return activatesActiveByDefault;
-    }
-
     List<Profile> getActivatedProfiles(Collection<Profile> availableProfiles, ProfileActivationContext context, ModelProblemCollector problems) {
         List<Profile> result = new ArrayList<Profile>();
         for (Profile profile : availableProfiles) {
@@ -83,42 +75,36 @@ public class StrongDefaultActivationProfileSelector implements ProfileSelector {
                 result.add(profile);
             }
         }
-        if (activatesActiveByDefault(context)) {
-            for (Profile profile : availableProfiles) {
-                if (!context.getInactiveProfileIds().contains(profile.getId())
-                        && isActiveByDefault(profile)
-                        && !result.contains(profile)) {
-                    result.add(profile);
-                }
-            }
-        }
         return result;
     }
 
     List<Profile> getActiveByDefaultProfiles(Collection<Profile> availableProfiles, ProfileActivationContext context, ModelProblemCollector problems) {
         List<Profile> result = new ArrayList<Profile>();
-        if (!activatesActiveByDefault(context)) {
-            for (Profile profile : availableProfiles) {
-                if (!context.getInactiveProfileIds().contains(profile.getId())
-                        && isActiveByDefault(profile)) {
-                    result.add(profile);
-                }
+        for (Profile profile : availableProfiles) {
+            if (!context.getInactiveProfileIds().contains(profile.getId())
+                    && isActiveByDefault(profile)) {
+                result.add(profile);
             }
         }
         return result;
     }
 
     private boolean isActive(Profile profile, ProfileActivationContext context, ModelProblemCollector problems) {
-        boolean isActive = true;
-        for (ProfileActivator activator : activators) {
-            try {
-                isActive &= activator.isActive(profile, context, problems);
-            } catch (RuntimeException e) {
-                problems.add(new ModelProblemCollectorRequest(ModelProblem.Severity.ERROR, ModelProblem.Version.BASE).setMessage("Failed to determine activation for profile " + profile.getId()).setLocation(profile.getLocation("")).setException(e));
-                return false;
+        String isActiveString = profile.getProperties().getProperty(PropertyName.PROFILE_ACTIVE);
+        if (isActiveString != null && (isActiveString.equals("true") || isActiveString.equals("yes")))
+            return true;
+        else {
+            boolean isActive = true;
+            for (ProfileActivator activator : activators) {
+                try {
+                    isActive &= activator.isActive(profile, context, problems);
+                } catch (RuntimeException e) {
+                    problems.add(new ModelProblemCollectorRequest(ModelProblem.Severity.ERROR, ModelProblem.Version.BASE).setMessage("Failed to determine activation for profile " + profile.getId()).setLocation(profile.getLocation("")).setException(e));
+                    return false;
+                }
             }
+            return isActive;
         }
-        return isActive;
     }
 
     private boolean isActiveByDefault(Profile profile) {

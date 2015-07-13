@@ -35,9 +35,9 @@ package com.github.sviperll.maven.profiledep;
  */
 public class PropertyName {
     public static final String ACTIVATE_PARENT_PROFILES = "parent.profile.activate";
+    public static final String PROFILE_ACTIVE = "parent.active";
     public static final String PROFILE_PROVIDES = "profile.provides";
     public static final String PROFILE_DEPENDS = "profile.depends";
-    static final String ACTIVATE_ACTIVE_BY_DEFAULT_PROFILES = "profile.activate.default";
 
     private PropertyName() {
     }
