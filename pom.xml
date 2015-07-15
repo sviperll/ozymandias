@@ -8,8 +8,9 @@
     <description>Collection of maven extensions, plugins and generally usefull artifacts</description>
     <url>https://github.com/sviperll/ozymandias</url>
     <properties>
-        <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
-        <maven-resources-plugin.version>2.6</maven-resources-plugin.version>
+        <ozymandias.version>0.10-successor-SNAPSHOT</ozymandias.version>
+        <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
+        <maven-resources-plugin.version>2.7</maven-resources-plugin.version>
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
         <maven-source-plugin.version>2.4</maven-source-plugin.version>
         <maven-javadoc-plugin.version>2.10.1</maven-javadoc-plugin.version>
@@ -60,6 +61,15 @@
     </licenses>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <!-- You should always use version control systems -->
+                    <generateBackupPoms>false</generateBackupPoms>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

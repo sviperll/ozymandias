@@ -12,11 +12,11 @@
     <description>Artifact to use as universal maven parent</description>
     <url>https://github.com/sviperll/ozymandias/tree/master/maven-parent</url>
     <properties>
-        <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
-        <maven-resources-plugin.version>2.6</maven-resources-plugin.version>
+        <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
+        <maven-resources-plugin.version>2.7</maven-resources-plugin.version>
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
         <maven-source-plugin.version>2.4</maven-source-plugin.version>
-        <maven-javadoc-plugin.version>2.10.1</maven-javadoc-plugin.version>
+        <maven-javadoc-plugin.version>2.10.3</maven-javadoc-plugin.version>
         <maven-site-plugin.version>3.4</maven-site-plugin.version>
         <pitest-maven.version>1.1.5</pitest-maven.version>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -219,13 +219,13 @@
                 <plugin>
                     <groupId>com.github.sviperll</groupId>
                     <artifactId>coreext-maven-plugin</artifactId>
-                    <version>0.10-successor-SNAPSHOT</version>
+                    <version>${ozymandias.version}</version>
                     <configuration>
                         <extensions combine.children="append">
                             <extension>
                                 <groupId>com.github.sviperll</groupId>
                                 <artifactId>maven-profiledep-extension</artifactId>
-                                <version>0.10</version>
+                                <version>${ozymandias.version}</version>
                             </extension>
                         </extensions>
                     </configuration>

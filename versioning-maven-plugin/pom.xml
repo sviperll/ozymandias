@@ -7,7 +7,6 @@
     </parent>
     <groupId>com.github.sviperll</groupId>
     <artifactId>versioning-maven-plugin</artifactId>
-    <version>0.10-successor-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
     <name>versioning-maven-plugin</name>
     <description>Support versioning policy</description>

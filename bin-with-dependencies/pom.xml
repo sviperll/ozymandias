@@ -8,7 +8,6 @@
     </parent>
     <groupId>com.github.sviperll</groupId>
     <artifactId>bin-with-dependencies</artifactId>
-    <version>0.10-successor-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>bin-with-dependencies</name>
     <description>Assembly for maven-assembly-plugin to pack jar with it's dependencies</description>
