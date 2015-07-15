@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.github.sviperll</groupId>
         <artifactId>ozymandias</artifactId>
-        <version>0.11</version>
+        <version>0.11-successor-SNAPSHOT</version>
     </parent>
     <groupId>com.github.sviperll</groupId>
     <artifactId>coreext-maven-plugin</artifactId>
