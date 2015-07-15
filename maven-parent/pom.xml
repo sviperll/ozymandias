@@ -798,7 +798,7 @@
         <profile>
             <id>release-profile</id>
             <properties>
-                <profile.depends>bootclasspath,attach-sources,attach-javadocs,sign-artifacts</profile.depends>
+                <profile.depends>bootclasspath,attach-sources,attach-javadocs,sign-artifacts,pitest-cover</profile.depends>
             </properties>
         </profile>
         <profile>
@@ -884,9 +884,6 @@
         </profile>
         <profile>
             <id>pitest-cover</id>
-            <properties>
-                <profile.active>true</profile.active>
-            </properties>
             <build>
                 <plugins>
                     <plugin>
