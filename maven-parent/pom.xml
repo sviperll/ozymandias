@@ -18,7 +18,7 @@
         <maven-source-plugin.version>2.4</maven-source-plugin.version>
         <maven-javadoc-plugin.version>2.10.3</maven-javadoc-plugin.version>
         <maven-site-plugin.version>3.4</maven-site-plugin.version>
-        <pitest-maven.version>1.1.5</pitest-maven.version>
+        <pitest-maven.version>1.1.6</pitest-maven.version>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -36,10 +36,6 @@
                     </reportSet>
                 </reportSets>
             </plugin>
-            <!-- PITest is mutation testing coverage tool -->
-            <!-- Mutation testing should be used to find out your test coverage -->
-            <!-- Version 1.1.6 provides report goal, but it's not released yet -->
-            <!--
             <plugin>
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
@@ -52,7 +48,6 @@
                     </reportSet>
                 </reportSets>
             </plugin>
-            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
@@ -133,7 +128,7 @@
                 <plugin>
                     <groupId>io.takari.maven.plugins</groupId>
                     <artifactId>takari-lifecycle-plugin</artifactId>
-                    <version>1.11.7</version>
+                    <version>1.11.9</version>
                     <configuration>
                         <accessRulesViolation>error</accessRulesViolation>
                         <encoding>${project.build.sourceEncoding}</encoding>
