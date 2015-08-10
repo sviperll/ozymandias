@@ -37,18 +37,6 @@
                 </reportSets>
             </plugin>
             <plugin>
-                <groupId>org.pitest</groupId>
-                <artifactId>pitest-maven</artifactId>
-                <version>${pitest-maven.version}</version>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>report</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
                 <version>2.8</version>
@@ -844,20 +832,20 @@
         <profile>
             <id>release-profile</id>
             <properties>
-                <profile.depends>release-profile-common,release-pitest-cover-choice</profile.depends>
+                <profile.depends>release-profile-common,release-pitest-report-choice</profile.depends>
             </properties>
         </profile>
         <profile>
-            <id>release-pitest-cover</id>
+            <id>release-pitest-report</id>
             <properties>
-                <profile.provides>release-pitest-cover-choice</profile.provides>
-                <profile.depends>pitest-cover</profile.depends>
+                <profile.provides>release-pitest-report-choice</profile.provides>
+                <profile.depends>pitest-report</profile.depends>
             </properties>
         </profile>
         <profile>
-            <id>no-release-pitest-cover</id>
+            <id>no-release-pitest-report</id>
             <properties>
-                <profile.provides>release-pitest-cover-choice</profile.provides>
+                <profile.provides>release-pitest-report-choice</profile.provides>
             </properties>
         </profile>
         <profile>
@@ -948,7 +936,7 @@
             </build>
         </profile>
         <profile>
-            <id>pitest-cover</id>
+            <id>pitest-report</id>
             <build>
                 <plugins>
                     <plugin>
@@ -957,7 +945,7 @@
                         <executions>
                             <execution>
                                 <id>pitest-cover</id>
-                                <phase>verify</phase>
+                                <phase>pre-site</phase>
                                 <goals>
                                     <goal>mutationCoverage</goal>
                                 </goals>
@@ -966,6 +954,22 @@
                     </plugin>
                 </plugins>
             </build>
+            <reporting>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <version>${pitest-maven.version}</version>
+                        <reportSets>
+                            <reportSet>
+                                <reports>
+                                    <report>report</report>
+                                </reports>
+                            </reportSet>
+                        </reportSets>
+                    </plugin>
+                </plugins>
+            </reporting>
         </profile>
     </profiles>
 </project>
