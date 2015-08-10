@@ -844,7 +844,26 @@
         <profile>
             <id>release-profile</id>
             <properties>
-                <profile.depends>bootclasspath,attach-sources,attach-javadocs,sign-artifacts,pitest-cover</profile.depends>
+                <profile.depends>release-profile-common,release-pitest-cover-choice</profile.depends>
+            </properties>
+        </profile>
+        <profile>
+            <id>release-pitest-cover</id>
+            <properties>
+                <profile.provides>release-pitest-cover-choice</profile.provides>
+                <profile.depends>pitest-cover</profile.depends>
+            </properties>
+        </profile>
+        <profile>
+            <id>no-release-pitest-cover</id>
+            <properties>
+                <profile.provides>release-pitest-cover-choice</profile.provides>
+            </properties>
+        </profile>
+        <profile>
+            <id>release-profile-common</id>
+            <properties>
+                <profile.depends>bootclasspath,attach-sources,attach-javadocs,sign-artifacts</profile.depends>
             </properties>
         </profile>
         <profile>
