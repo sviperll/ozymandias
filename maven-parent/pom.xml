@@ -22,6 +22,12 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>synergian-repo</id>
+            <url>https://raw.github.com/synergian/wagon-git/releases</url>
+        </pluginRepository>
+    </pluginRepositories>
     <reporting>
         <plugins>
             <plugin>
@@ -247,9 +253,9 @@
                             <version>1.6</version>
                         </dependency>
                         <dependency>
-                            <groupId>net.trajano.wagon</groupId>
+                            <groupId>ar.com.synergian</groupId>
                             <artifactId>wagon-git</artifactId>
-                            <version>2.0.0</version>
+                            <version>0.2.5</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -839,13 +845,14 @@
             <id>release-pitest-report</id>
             <properties>
                 <profile.provides>release-pitest-report-choice</profile.provides>
-                <profile.depends>pitest-report</profile.depends>
+                <profile.depends>pitest-report-implementation,pitest-report</profile.depends>
             </properties>
         </profile>
         <profile>
             <id>no-release-pitest-report</id>
             <properties>
                 <profile.provides>release-pitest-report-choice</profile.provides>
+                <profile.depends>!pitest-report-implementation,!pitest-report</profile.depends>
             </properties>
         </profile>
         <profile>
@@ -937,6 +944,12 @@
         </profile>
         <profile>
             <id>pitest-report</id>
+        </profile>
+        <profile>
+            <id>pitest-report-implementation</id>
+            <properties>
+                <profile.depends>pitest-report</profile.depends>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -945,7 +958,7 @@
                         <executions>
                             <execution>
                                 <id>pitest-cover</id>
-                                <phase>pre-site</phase>
+                                <phase>verify</phase>
                                 <goals>
                                     <goal>mutationCoverage</goal>
                                 </goals>
