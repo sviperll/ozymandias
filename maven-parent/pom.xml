@@ -734,7 +734,7 @@
                             <dependency>
                                 <groupId>com.github.sviperll</groupId>
                                 <artifactId>bin-with-dependencies</artifactId>
-                                <version>${project.version}</version>
+                                <version>${ozymandias.version}</version>
                             </dependency>
                         </dependencies>
                         <executions>
