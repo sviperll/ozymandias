@@ -2,13 +2,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.sviperll</groupId>
     <artifactId>ozymandias</artifactId>
-    <version>0.15-successor-SNAPSHOT</version>
+    <version>0.16</version>
     <packaging>pom</packaging>
     <name>ozymandias</name>
     <description>Collection of maven extensions, plugins and generally usefull artifacts</description>
     <url>https://github.com/sviperll/ozymandias</url>
     <properties>
-        <ozymandias.version>0.15-successor-SNAPSHOT</ozymandias.version>
+        <ozymandias.version>0.16</ozymandias.version>
         <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
         <maven-resources-plugin.version>2.7</maven-resources-plugin.version>
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
