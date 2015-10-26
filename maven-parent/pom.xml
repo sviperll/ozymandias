@@ -858,7 +858,7 @@
         <profile>
             <id>release-profile-common</id>
             <properties>
-                <profile.depends>bootclasspath,attach-sources,attach-javadocs,sign-artifacts</profile.depends>
+                <profile.depends>bootclasspath,attach-sources,attach-javadocs,sign-artifacts,findbugs-check</profile.depends>
             </properties>
         </profile>
         <profile>
@@ -921,9 +921,6 @@
         </profile>
         <profile>
             <id>findbugs-check</id>
-            <properties>
-                <profile.active>true</profile.active>
-            </properties>
             <build>
                 <plugins>
                     <plugin>
