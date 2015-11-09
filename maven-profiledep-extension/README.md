@@ -12,7 +12,7 @@ Modularization is achieved with several features provided by this extension:
  * a way to activate profiles provided by parent pom from current pom.
  * a way to make profile always activate, except when explicitly deactivated
 
-See [maven-parent](https://github.com/sviperll/ozymandias/tree/master/maven-parent) project for example of `maven-profiledep-extension` usage.
+See [universal-maven-parent](https://github.com/sviperll/universal-maven-parent) project for example of `maven-profiledep-extension` usage.
 
 Active by default profiles
 --------------------------

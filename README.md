@@ -9,10 +9,6 @@ This package is used to share building tools for other projects.
 Child projects
 --------------
 
- * [maven-parent](https://github.com/sviperll/ozymandias/tree/master/maven-parent)
-
-   Generic artifact to be used as a parent pom for any other stand-alone project.
-
  * [mustache-maven-plugin](https://github.com/sviperll/ozymandias/tree/master/mustache-maven-plugin)
 
    Render mustache templates during maven build using data from some json- or .properties-file.

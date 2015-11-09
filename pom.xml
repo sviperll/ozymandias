@@ -21,7 +21,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <modules>
-        <module>maven-parent</module>
         <module>maven-profiledep-extension</module>
         <module>mustache-maven-plugin</module>
         <module>versioning-maven-plugin</module>
@@ -98,6 +97,17 @@
                 <artifactId>maven-site-plugin</artifactId>
                 <version>${maven-site-plugin.version}</version>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <!-- 2.2 ,2.3 and 2.4 doesn't work with git -->
+                <version>2.5.2</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <useReleaseProfile>false</useReleaseProfile>
+                    <arguments>-Pozymandias-release-profile</arguments>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -145,6 +155,36 @@
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>default-deploy</id>
+                                <goals>
+                                    <goal>deploy</goal>
+                                </goals>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <configuration>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <serverId>oss-sonatype-nexus</serverId>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>default-deploy</id>
+                                <goals>
+                                    <goal>deploy</goal>
+                                </goals>
+                                <phase>deploy</phase>
                             </execution>
                         </executions>
                     </plugin>
