@@ -55,7 +55,7 @@ that all your projects have required core extensions installed.
             <plugin>
                 <groupId>com.github.sviperll</groupId>
                 <artifactId>coreext-maven-plugin</artifactId>
-                <version>0.10</version>
+                <version>0.20</version>
                 <configuration>
                     <!-- Required core extensions: -->
                     <extensions combine.children="append">

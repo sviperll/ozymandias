@@ -239,8 +239,8 @@ way you specify profiles in command line.
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.github.sviperll</groupId>
-        <artifactId>maven-parent</artifactId>
-        <version>0.10</version>
+        <artifactId>universal-maven-parent</artifactId>
+        <version>0.20</version>
     </parent>
     <groupId>group</groupId>
     <artifactId>myartifact</artifactId>
@@ -271,8 +271,8 @@ and parent of parent pom etc, but never affects current pom.
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.github.sviperll</groupId>
-        <artifactId>maven-parent</artifactId>
-        <version>0.10</version>
+        <artifactId>universal-maven-parent</artifactId>
+        <version>0.20</version>
     </parent>
     <groupId>group</groupId>
     <artifactId>myartifact</artifactId>
@@ -316,14 +316,14 @@ like this:
             <plugin>
                 <groupId>com.github.sviperll</groupId>
                 <artifactId>coreext-maven-plugin</artifactId>
-                <version>0.10</version>
+                <version>0.20</version>
                 <configuration>
                     <extensions combine.children="append">
                         <!-- ... -->
                         <extension>
                             <groupId>com.github.sviperll</groupId>
                             <artifactId>maven-profiledep-extension</artifactId>
-                            <version>0.10</version>
+                            <version>0.20</version>
                         </extension>
                         <!-- ... -->
                     </extensions>
@@ -349,7 +349,7 @@ If you wish you can manually write `.mvn/extensions.xml` file like this:
   <extension>
     <groupId>com.github.sviperll</groupId>
     <artifactId>maven-profiledep-extension</artifactId>
-    <version>0.10</version>
+    <version>0.20</version>
   </extension>
 </extensions>
 ````
