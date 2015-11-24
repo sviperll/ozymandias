@@ -7,6 +7,7 @@ package com.github.sviperll.maven.profiledep;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.maven.model.Profile;
 import org.apache.maven.model.building.ModelProblemCollector;

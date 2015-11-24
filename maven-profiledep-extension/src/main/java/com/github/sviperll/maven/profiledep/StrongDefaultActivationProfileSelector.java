@@ -59,7 +59,7 @@ public class StrongDefaultActivationProfileSelector implements ProfileSelector {
         List<Profile> activatedProfiles = getActivatedProfiles(availableProfiles, context, problems);
         if (activatedProfiles.isEmpty()) {
             // Default profiles are activated only if nothing else is activated
-            // This repeats normal maven behaviour
+            // This follows default maven behaviour
 
             activatedProfiles = getActiveByDefaultProfiles(availableProfiles, context, problems);
         }
@@ -94,16 +94,21 @@ public class StrongDefaultActivationProfileSelector implements ProfileSelector {
         if (isActiveString != null && (isActiveString.equals("true") || isActiveString.equals("yes")))
             return true;
         else {
-            boolean isActive = true;
+            boolean hasActivators = false;
+            boolean allActivated = true;
             for (ProfileActivator activator : activators) {
-                try {
-                    isActive &= activator.isActive(profile, context, problems);
-                } catch (RuntimeException e) {
-                    problems.add(new ModelProblemCollectorRequest(ModelProblem.Severity.ERROR, ModelProblem.Version.BASE).setMessage("Failed to determine activation for profile " + profile.getId()).setLocation(profile.getLocation("")).setException(e));
-                    return false;
+                if (activator.presentInConfig(profile, context, problems)) {
+                    hasActivators = true;
+                    try {
+                        if (!activator.isActive(profile, context, problems))
+                            allActivated = false;
+                    } catch (RuntimeException e) {
+                            problems.add(new ModelProblemCollectorRequest(ModelProblem.Severity.ERROR, ModelProblem.Version.BASE).setMessage("Failed to determine activation for profile " + profile.getId()).setLocation(profile.getLocation("")).setException(e));
+                            allActivated = false;
+                    }
                 }
             }
-            return isActive;
+            return hasActivators && allActivated;
         }
     }
 
