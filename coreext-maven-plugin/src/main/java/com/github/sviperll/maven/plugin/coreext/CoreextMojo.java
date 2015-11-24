@@ -20,7 +20,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  *
- * @author Victor Nazarov <asviraspossible@gmail.com>
+ * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 abstract class CoreextMojo extends AbstractMojo {
     @Parameter(property = "maven.multiModuleProjectDirectory", readonly = true, required = true)

@@ -12,7 +12,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 /**
  * Goal which read properties from file.
  *
- * @author Victor Nazarov <asviraspossible@gmail.com>
+ * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 @Mojo(name = "classify", defaultPhase = LifecyclePhase.INITIALIZE)
 public class ClassifyVersioningMojo extends VersioningMojo {

@@ -18,7 +18,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 /**
  * Checks if all required core extensions are installed
  *
- * @author Victor Nazarov <asviraspossible@gmail.com>
+ * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 @Mojo(name = "check", defaultPhase = LifecyclePhase.VALIDATE)
 public class CheckCoreextMojo extends CoreextMojo {

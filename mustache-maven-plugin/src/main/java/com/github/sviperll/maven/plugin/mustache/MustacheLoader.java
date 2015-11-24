@@ -16,7 +16,7 @@ import org.apache.maven.plugin.logging.Log;
 
 /**
  *
- * @author Victor Nazarov <asviraspossible@gmail.com>
+ * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 class MustacheLoader {
     private final MustacheFactory mustacheFactory;

@@ -7,7 +7,7 @@ import java.util.Arrays;
 
 /**
  *
- * @author Victor Nazarov <asviraspossible@gmail.com>
+ * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 class VersionComponentScanner {
     private static final char[] numberChars = new char[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'};

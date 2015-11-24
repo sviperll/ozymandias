@@ -24,7 +24,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 /**
  * Install required core extensions are installed
  *
- * @author Victor Nazarov <asviraspossible@gmail.com>
+ * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 @Mojo(name = "install", defaultPhase = LifecyclePhase.INITIALIZE)
 public class InstallCoreextMojo extends CoreextMojo {

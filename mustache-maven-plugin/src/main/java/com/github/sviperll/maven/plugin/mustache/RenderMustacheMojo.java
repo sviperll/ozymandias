@@ -16,7 +16,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 /**
  * Goal which writes properties to file.
  *
- * @author Victor Nazarov <asviraspossible@gmail.com>
+ * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 @Mojo(name = "render", defaultPhase = LifecyclePhase.GENERATE_RESOURCES)
 public class RenderMustacheMojo extends ConfiguredMustacheMojo {

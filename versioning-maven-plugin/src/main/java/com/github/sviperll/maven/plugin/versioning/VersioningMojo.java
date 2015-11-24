@@ -28,7 +28,7 @@ import org.codehaus.plexus.components.interactivity.PrompterException;
 
 /**
  *
- * @author Victor Nazarov <asviraspossible@gmail.com>
+ * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 abstract class VersioningMojo extends AbstractMojo {
     /**

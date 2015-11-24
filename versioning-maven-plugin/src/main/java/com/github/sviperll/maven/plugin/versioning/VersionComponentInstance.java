@@ -5,7 +5,7 @@ package com.github.sviperll.maven.plugin.versioning;
 
 /**
  *
- * @author Victor Nazarov <asviraspossible@gmail.com>
+ * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 class VersionComponentInstance {
     private static final VersionComponentInstance SIMPLE_EXTENTION = new VersionComponentInstance("", VersionComponent.numbers(new int[] {1}));

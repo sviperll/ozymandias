@@ -25,7 +25,7 @@ import org.apache.maven.plugin.AbstractMojo;
 
 /**
  *
- * @author Victor Nazarov <asviraspossible@gmail.com>
+ * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 abstract class MustacheMojo extends AbstractMojo {
     Map<String, Object> loadPropertiesContext(File contextFile, Charset charset) throws IOException {

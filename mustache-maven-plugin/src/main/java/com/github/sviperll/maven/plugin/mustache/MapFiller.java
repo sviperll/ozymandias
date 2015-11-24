@@ -8,7 +8,7 @@ import java.util.TreeMap;
 
 /**
  *
- * @author Victor Nazarov <asviraspossible@gmail.com>
+ * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 class MapFiller {
     private final Map<String, Object> result;

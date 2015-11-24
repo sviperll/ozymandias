@@ -20,7 +20,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 /**
  * Goal which read properties from file.
  *
- * @author Victor Nazarov <asviraspossible@gmail.com>
+ * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 @Mojo(name = "update-file", defaultPhase = LifecyclePhase.INITIALIZE, inheritByDefault = false, aggregator = true)
 public class UpdateFileVersioningMojo extends VersioningMojo {

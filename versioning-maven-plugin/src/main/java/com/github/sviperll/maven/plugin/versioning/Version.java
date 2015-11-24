@@ -5,7 +5,7 @@ package com.github.sviperll.maven.plugin.versioning;
 
 /**
  *
- * @author Victor Nazarov <asviraspossible@gmail.com>
+ * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 class Version implements Comparable<Version> {
 

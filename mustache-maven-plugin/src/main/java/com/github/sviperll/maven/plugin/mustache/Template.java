@@ -7,7 +7,7 @@ import java.io.File;
 
 /**
  *
- * @author Victor Nazarov <asviraspossible@gmail.com>
+ * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 public class Template {
     File inputFile;
