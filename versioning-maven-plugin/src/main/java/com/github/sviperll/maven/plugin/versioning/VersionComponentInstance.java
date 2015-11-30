@@ -8,12 +8,6 @@ package com.github.sviperll.maven.plugin.versioning;
  * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 class VersionComponentInstance {
-    private static final VersionComponentInstance SIMPLE_EXTENTION = new VersionComponentInstance("", VersionComponent.numbers(new int[] {1}));
-
-    static VersionComponentInstance simpleExtention() {
-        return SIMPLE_EXTENTION;
-    }
-
     private final String separator;
     private final VersionComponent component;
     public VersionComponentInstance(String separator, VersionComponent component) {
@@ -37,11 +31,15 @@ class VersionComponentInstance {
     }
 
     boolean isLessThanOrEqualsToFinal() {
-        return component.compareTo(VersionComponent.finalVersion()) <= 0;
+        return component.isLessThanOrEqualsToFinal();
     }
 
-    boolean isFinal() {
-        return component.isFinal();
+    VersionSchema schema() {
+        return component.schema();
+    }
+
+    boolean isFinalComponent() {
+        return component.isFinalComponent();
     }
 
     boolean isNumbers() {

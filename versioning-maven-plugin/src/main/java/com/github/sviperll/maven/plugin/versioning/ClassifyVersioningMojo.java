@@ -25,7 +25,7 @@ public class ClassifyVersioningMojo extends VersioningMojo {
     String versionKindPropertyName = "project.version.kind";
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void executeInitialized() throws MojoExecutionException, MojoFailureException {
         getLog().info("Parsed version is " + version);
         project.getProperties().setProperty(versionKindPropertyName, versionKind(version));
     }

@@ -29,7 +29,7 @@ public class PromptVersioningMojo extends VersioningMojo {
     String decidedVersionPropertyName;
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void executeInitialized() throws MojoExecutionException, MojoFailureException {
         getLog().info("Version Selection");
         getLog().info("Current version is " + version);
 
@@ -59,25 +59,25 @@ public class PromptVersioningMojo extends VersioningMojo {
     }
 
     private ArrayList<Version> deviseCandidateVersions(VersionComponent requiredSuffix) {
-        VersionComponentScanner scanner = VersionComponentScanner.createInstance(version);
+        VersionComponentScanner scanner = versionSchema.createScanner(version);
         VersionComponentInstance numbers = scanner.getNextComponentInstance();
         VersionComponentInstance suffix = scanner.getNextComponentInstance();
         VersionComponentInstance suffixExtention = scanner.getNextComponentInstance();
         ArrayList<Version> versions = new ArrayList<Version>();
-        Version base = new Version(version);
-        Version candidate = Version.of(numbers, requiredSuffix.withTheSameSeparator(suffix));
+        Version base = versionSchema.version(version);
+        Version candidate = versionSchema.versionOf(numbers, requiredSuffix.withTheSameSeparator(suffix));
         if (candidate.compareTo(base) >= 0) {
             versions.add(candidate);
-            if (requiredSuffix.isExtensible())
-                versions.add(candidate.extended(VersionComponentInstance.simpleExtention()));
+            if (requiredSuffix.allowsMoreComponents())
+                versions.add(candidate.simpleExtention());
         } else if (suffix.component().equals(requiredSuffix) && suffixExtention.isNumbers()) {
-            candidate = Version.of(numbers, suffix, suffixExtention);
+            candidate = versionSchema.versionOf(numbers, suffix, suffixExtention);
             if (candidate.compareTo(base) >= 0)
                 versions.add(candidate);
             else {
                 List<VersionComponent> suffixExtentionVariants = suffixExtention.component().nextNumbersComponentVariants(1, 3);
                 for (VersionComponent variant: suffixExtentionVariants) {
-                    candidate = Version.of(numbers, suffix, variant.withTheSameSeparator(suffixExtention));
+                    candidate = versionSchema.versionOf(numbers, suffix, variant.withTheSameSeparator(suffixExtention));
                     if (candidate.compareTo(base) >= 0)
                         versions.add(candidate);
                 }
@@ -85,11 +85,11 @@ public class PromptVersioningMojo extends VersioningMojo {
         } else if (numbers.isNumbers()) {
             List<VersionComponent> numbersVariants = numbers.component().deepNextNumbersComponentVariants(2, 3);
             for (VersionComponent variant: numbersVariants) {
-                candidate = Version.of(variant.withTheSameSeparator(numbers), requiredSuffix.withTheSameSeparator(suffix));
+                candidate = versionSchema.versionOf(variant.withTheSameSeparator(numbers), requiredSuffix.withTheSameSeparator(suffix));
                 if (candidate.compareTo(base) >= 0) {
                     versions.add(candidate);
-                    if (requiredSuffix.isExtensible()) {
-                        versions.add(candidate.extended(VersionComponentInstance.simpleExtention()));
+                    if (requiredSuffix.allowsMoreComponents()) {
+                        versions.add(candidate.simpleExtention());
                     }
                 }
             }
@@ -98,22 +98,34 @@ public class PromptVersioningMojo extends VersioningMojo {
     }
 
     private VersionComponent promptForKind() throws MojoExecutionException {
-        String prompt = "Select version kind: alpha, beta, release candidate (rc), final release";
+        List<String> options = new ArrayList<String>();
+        String[] predecessorSuffixes = versionSchema.getPredecessorSuffixes();
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Select version kind: ");
+        for (String suffix: predecessorSuffixes) {
+            prompt.append(suffixDescription(suffix)).append(", ");
+            options.addAll(Arrays.asList(versionSchema.getSuffixVariants(suffix)));
+        }
+
+        String finalSuffix = versionSchema.getNonEmptyFinalSuffix();
+        prompt.append(finalSuffix);
+        options.addAll(Arrays.asList(versionSchema.getSuffixVariants(finalSuffix)));
         String kind;
         try {
-            kind = prompter.prompt(prompt, Arrays.asList("alpha", "beta", "rc", "final"), "final");
+            kind = prompter.prompt(prompt.toString(), options, finalSuffix);
         } catch (PrompterException ex) {
             throw new MojoExecutionException("Unable to get version kind", ex);
         }
-        if (kind.equals("alpha"))
-            return VersionComponent.alpha();
-        else if (kind.equals("beta"))
-            return VersionComponent.beta();
-        else if (kind.equals("rc"))
-            return VersionComponent.rc();
-        else if (kind.equals("final"))
-            return VersionComponent.finalVersion();
-        else
-            throw new MojoExecutionException("Chosen value outside of allowed range");
+        return versionSchema.suffixComponent(versionSchema.getCanonicalSuffix(kind));
+    }
+
+    private String suffixDescription(String suffix) {
+        StringBuilder result = new StringBuilder();
+        result.append(suffix);
+        String description = versionSchema.getSuffixDescription(suffix);
+        if (description != null) {
+            result.append(" (").append(description).append(")");
+        }
+        return result.toString();
     }
 }

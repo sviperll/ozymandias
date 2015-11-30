@@ -6,7 +6,6 @@ package com.github.sviperll.maven.plugin.versioning;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 /**
  *
@@ -14,82 +13,169 @@ import java.util.Locale;
  */
 abstract class VersionComponent implements Comparable<VersionComponent> {
 
-    private static VersionComponent special(final SpecialKind kind) {
-        return new VersionComponent() {
-            @Override
-            <R> R accept(Visitor<R> visitor) {
-                return visitor.special(kind);
+    static VersionComponent numbers(VersionSchema schema, int[] numbers) {
+        return new NumbersVersionComponent(schema, numbers);
+    }
+
+    static VersionComponent suffix(VersionSchema schema, String suffix) {
+        boolean isPredecessorSuffix = schema.isPredecessorSuffix(suffix);
+        boolean isFinalComponent = schema.isFinalSuffix(suffix);
+        return new SuffixVersionComponent(schema, suffix, isPredecessorSuffix, isFinalComponent);
+    }
+
+    static VersionComponent finalVersionComponent(VersionSchema schema) {
+        return suffix(schema, schema.getCanonicalFinalSuffix());
+    }
+
+    private final VersionSchema schema;
+
+    private VersionComponent(VersionSchema schema) {
+        this.schema = schema;
+    }
+
+    abstract boolean isNumbers();
+    abstract boolean isSuffix();
+    abstract boolean isPredecessorSuffix();
+    abstract boolean isFinalComponent();
+    abstract int[] getNumbers();
+    abstract String getSuffixString();
+
+    VersionSchema schema() {
+        return schema;
+    }
+
+    boolean allowsMoreComponents() {
+        return !isFinalComponent();
+    }
+
+    VersionComponentInstance withTheSameSeparator(VersionComponentInstance component) {
+        return component.withTheSameSeparator(this);
+    }
+
+    List<VersionComponent> nextNumbersComponentVariants(int minDepth, int maxDepth) {
+        return nextNumbersComponentVariants(minDepth, maxDepth, false);
+    }
+    private List<VersionComponent> nextNumbersComponentVariants(int minDepth, int maxDepth, boolean goesDeeper) {
+        List<VersionComponent> result = new ArrayList<VersionComponent>();
+        int[] numbers = getNumbers();
+        int reachableDepth = goesDeeper ? maxDepth : Math.min(numbers.length, maxDepth);
+        for (int depth = minDepth; depth <= reachableDepth; depth++) {
+            for (int i = 0; i < depth; i++) {
+                int[] variant = Arrays.copyOf(numbers, depth);
+                variant[i] = i < numbers.length ? numbers[i] + 1 : 1;
+                for (int j = i + 1; j < depth; j++)
+                    variant[j] = 0;
+                result.add(VersionComponent.numbers(schema, variant));
             }
-        };
+        }
+        return result;
     }
 
-    static VersionComponent alpha() {
-        return special(SpecialKind.ALPHA);
+    List<VersionComponent> deepNextNumbersComponentVariants(int minDepth, int maxDepth) {
+        return nextNumbersComponentVariants(minDepth, maxDepth, true);
     }
 
-    static VersionComponent beta() {
-        return special(SpecialKind.BETA);
+    String defaultSeparator() {
+        return isSuffix() && getCanonicalSuffixString().isEmpty() ? "" : "-";
     }
 
-    static VersionComponent rc() {
-        return special(SpecialKind.RC);
+    String getCanonicalSuffixString() {
+        return schema.getCanonicalSuffix(getSuffixString());
     }
 
-    static VersionComponent snapshot() {
-        return special(SpecialKind.SNAPSHOT);
+    boolean isLessThanOrEqualsToFinal() {
+        return compareTo(schema.finalVersionComponent()) <= 0;
     }
 
-    static VersionComponent finalVersion() {
-        return special(SpecialKind.FINAL);
-    }
-
-    static VersionComponent numbers(final int[] v) {
-        return new VersionComponent() {
-            @Override
-            <R> R accept(Visitor<R> visitor) {
-                return visitor.numbers(v);
+    @Override
+    public final int compareTo(final VersionComponent that) {
+        if (this.schema != that.schema)
+            throw new IllegalStateException("Comparison of version component with different suffix schema");
+        if (this.isPredecessorSuffix()) {
+            if (!that.isPredecessorSuffix())
+                return -1;
+            else {
+                return this.schema.compareSuffixes(this.getSuffixString(), that.getSuffixString());
             }
-        };
-    }
-
-    static VersionComponent custom(final String s) {
-        String lower = s.toLowerCase(Locale.US);
-        if (lower.equals("a") || lower.equals("alpha"))
-            return VersionComponent.special(SpecialKind.ALPHA);
-        else if (lower.equals("b") || lower.equals("beta"))
-            return VersionComponent.special(SpecialKind.BETA);
-        else if (lower.equals("rc"))
-            return VersionComponent.special(SpecialKind.RC);
-        else if (lower.equals("snapshot"))
-            return VersionComponent.special(SpecialKind.SNAPSHOT);
-        else if (lower.equals("") || lower.equals("final"))
-            return VersionComponent.special(SpecialKind.FINAL);
-        else {
-            for (SpecialKind kind: SpecialKind.values()) {
-                if (lower.equals(kind.toString().toLowerCase(Locale.US)))
-                    return VersionComponent.special(kind);
-            }
-            return new VersionComponent() {
-                @Override
-                <R> R accept(Visitor<R> visitor) {
-                    return visitor.custom(s);
+        } else if (this.isFinalComponent()) {
+            if (that.isPredecessorSuffix())
+                return 1;
+            else if (that.isFinalComponent())
+                return 0;
+            else
+                return -1;
+        } else if (this.isNumbers()) {
+            if (that.isPredecessorSuffix() || that.isFinalComponent())
+                return 1;
+            else if (that.isNumbers()) {
+                int[] thisNumbers = this.getNumbers();
+                int[] thatNumbers = that.getNumbers();
+                for (int i = 0; ; i++) {
+                    if (i >= thisNumbers.length && i >= thatNumbers.length)
+                        break;
+                    else if (i >= thisNumbers.length)
+                        return -1;
+                    else if (i >= thatNumbers.length)
+                        return 1;
+                    else {
+                        int thisElement = thisNumbers[i];
+                        int thatElement = thatNumbers[i];
+                        int result = thisElement < thatElement ? -1 : (thisElement == thatElement ? 0 : 1);
+                        if (result != 0)
+                            return result;
+                    }
                 }
-            };
+                return 0;
+            } else
+                return -1;
+            
+        } else {
+            if (that.isPredecessorSuffix() || that.isFinalComponent() || that.isNumbers())
+                return 1;
+            else
+                return schema.compareSuffixes(this.getSuffixString(), that.getSuffixString());
         }
     }
 
-    private VersionComponent() {
+    @Override
+    public final int hashCode() {
+        if (isNumbers()) {
+            int[] numbers = getNumbers();
+            int result = 6;
+            for (int i = 0; i < numbers.length; i++) {
+                result = result * 37 + numbers[i];
+            }
+            return result;
+        } else {
+            if (isPredecessorSuffix())
+                return (1 * 37 + schema.hashCode()) * 37 + getCanonicalSuffixString().hashCode();
+            else if (isFinalComponent())
+                return 2 * 37 + schema.hashCode();
+            else
+                return (3 * 37 + schema.hashCode()) * 37 + getCanonicalSuffixString().hashCode();
+        }
     }
 
-    abstract <R> R accept(Visitor<R> visitor);
-
     @Override
-    public int compareTo(final VersionComponent that) {
-        return accept(new CompareVisitor(that));
+    public final String toString() {
+        if (isNumbers()) {
+            StringBuilder builder = new StringBuilder();
+            int[] numbers = getNumbers();
+            if (numbers.length > 0) {
+                builder.append(numbers[0]);
+                for (int i = 1; i < numbers.length; i++) {
+                    builder.append('.');
+                    builder.append(numbers[i]);
+                }
+            }
+            return builder.toString();
+        } else {
+            return getSuffixString();
+        }
     }
 
     @Override
-    public boolean equals(Object thatObject) {
+    public final boolean equals(Object thatObject) {
         if (this == thatObject)
             return true;
         else if (!(thatObject instanceof VersionComponent))
@@ -100,329 +186,87 @@ abstract class VersionComponent implements Comparable<VersionComponent> {
         }
     }
 
-    @Override
-    public int hashCode() {
-        return accept(new HashCodeVisitor());
-    }
+    private static class SuffixVersionComponent extends VersionComponent {
 
-    @Override
-    public String toString() {
-        return accept(new ToStringVisitor());
-    }
+        private final boolean isPredecessorSuffix;
+        private final boolean isFinalComponent;
+        private final String suffix;
 
-    VersionComponentInstance withTheSameSeparator(VersionComponentInstance component) {
-        return component.withTheSameSeparator(this);
-    }
-
-    boolean isNumbers() {
-        return accept(new IsNumbersVisitor());
-    }
-
-    boolean isExtensible() {
-        return !isFinal();
-    }
-
-    boolean isSpecial() {
-        return accept(new IsSpecialVisitor());
-    }
-
-    SpecialKind specialKind() {
-        return accept(new GetSpecialKindVisitor());
-    }
-
-    boolean isFinal() {
-        return isSpecial() && specialKind().equals(SpecialKind.FINAL);
-    }
-
-    List<VersionComponent> nextNumbersComponentVariants(int minDepth, int maxDepth) {
-        return accept(new NextNumbersComponentVariants(minDepth, maxDepth, false));
-    }
-
-    List<VersionComponent> deepNextNumbersComponentVariants(int minDepth, int maxDepth) {
-        return accept(new NextNumbersComponentVariants(minDepth, maxDepth, true));
-    }
-
-    String defaultSeparator() {
-        return isFinal() ? "" : "-";
-    }
-
-    interface Visitor<R> {
-        R special(SpecialKind kind);
-        R numbers(int[] v);
-        R custom(String s);
-    }
-
-    enum SpecialKind {
-        ALPHA("alpha"), BETA("beta"), RC("rc"), SNAPSHOT("snapshot"), FINAL("");
-
-        private final String representation;
-        private SpecialKind(String representation) {
-            this.representation = representation;
-        }
-        @Override
-        public String toString() {
-            return representation;
-        }
-    }
-
-    private static class CompareVisitor implements Visitor<Integer> {
-
-        private final VersionComponent that;
-
-        public CompareVisitor(VersionComponent that) {
-            this.that = that;
+        public SuffixVersionComponent(VersionSchema schema, String suffix, boolean isPredecessorSuffix, boolean isFinalComponent) {
+            super(schema);
+            this.isPredecessorSuffix = isPredecessorSuffix;
+            this.isFinalComponent = isFinalComponent;
+            this.suffix = suffix;
         }
 
         @Override
-        public Integer special(final SpecialKind thisKind) {
-            return that.accept(new SpecialCompareVisitor(thisKind));
-        }
-
-        @Override
-        public Integer numbers(final int[] thisV) {
-            return that.accept(new NumbersCompareVisitor(thisV));
-        }
-
-        @Override
-            public Integer custom(final String thisS) {
-                return that.accept(new CustomCompareVisitor(thisS));
-            }
-
-        private static class SpecialCompareVisitor implements Visitor<Integer> {
-
-            private final SpecialKind thisKind;
-
-            public SpecialCompareVisitor(SpecialKind thisKind) {
-                this.thisKind = thisKind;
-            }
-
-            @Override
-            public Integer special(SpecialKind thatKind) {
-                return thisKind.compareTo(thatKind);
-            }
-
-            @Override
-            public Integer numbers(int[] v) {
-                return -1;
-            }
-
-            @Override
-            public Integer custom(String s) {
-                return -1;
-            }
-        }
-
-        private static class NumbersCompareVisitor implements Visitor<Integer> {
-
-            private final int[] thisV;
-
-            public NumbersCompareVisitor(int[] thisV) {
-                this.thisV = thisV;
-            }
-
-            @Override
-            public Integer special(SpecialKind kind) {
-                return 1;
-            }
-
-            @Override
-            public Integer numbers(int[] thatV) {
-                for (int i = 0; ; i++) {
-                    if (i >= thisV.length && i >= thatV.length)
-                        break;
-                    else if (i >= thisV.length)
-                        return -1;
-                    else if (i >= thatV.length)
-                        return 1;
-                    else {
-                        int thisE = thisV[i];
-                        int thatE = thatV[i];
-                        int result = thisE < thatE ? -1 : (thisE == thatE ? 0 : 1);
-                        if (result != 0)
-                            return result;
-                    }
-                }
-                return 0;
-            }
-
-            @Override
-                public Integer custom(String s) {
-                    return -1;
-                }
-        }
-
-        private static class CustomCompareVisitor implements Visitor<Integer> {
-
-            private final String thisS;
-
-            public CustomCompareVisitor(String thisS) {
-                this.thisS = thisS;
-            }
-
-            @Override
-            public Integer special(SpecialKind kind) {
-                return 1;
-            }
-
-            @Override
-            public Integer numbers(int[] v) {
-                return 1;
-            }
-
-            @Override
-            public Integer custom(String thatS) {
-                return thisS.compareTo(thatS);
-            }
-        }
-    }
-
-    private static class HashCodeVisitor implements Visitor<Integer> {
-
-        public HashCodeVisitor() {
-        }
-
-        @Override
-        public Integer special(SpecialKind kind) {
-            return 5 * 37 + kind.hashCode();
-        }
-
-        @Override
-        public Integer numbers(int[] v) {
-            int result = 6;
-            for (int i = 0; i < v.length; i++) {
-                result = result * 37 + v[i];
-            }
-            return result;
-        }
-
-        @Override
-        public Integer custom(String s) {
-            return 7 * 37 + s.hashCode();
-        }
-    }
-
-    private static class ToStringVisitor implements Visitor<String> {
-
-        public ToStringVisitor() {
-        }
-
-        @Override
-        public String special(SpecialKind kind) {
-            return kind.toString();
-        }
-
-        @Override
-        public String numbers(int[] v) {
-            StringBuilder builder = new StringBuilder();
-            if (v.length > 0) {
-                builder.append(v[0]);
-                for (int i = 1; i < v.length; i++) {
-                    builder.append('.');
-                    builder.append(v[i]);
-                }
-            }
-            return builder.toString();
-        }
-
-        @Override
-        public String custom(String s) {
-            return s;
-        }
-    }
-
-    private static class IsNumbersVisitor implements Visitor<Boolean> {
-
-        public IsNumbersVisitor() {
-        }
-
-        @Override
-        public Boolean special(SpecialKind kind) {
+        boolean isNumbers() {
             return false;
         }
 
         @Override
-        public Boolean numbers(int[] v) {
+        boolean isSuffix() {
             return true;
         }
 
         @Override
-        public Boolean custom(String s) {
-            return false;
+        boolean isPredecessorSuffix() {
+            return isPredecessorSuffix;
+        }
+
+        @Override
+        boolean isFinalComponent() {
+            return isFinalComponent;
+        }
+                            
+        @Override
+        int[] getNumbers() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        String getSuffixString() {
+            return suffix;
         }
     }
 
-    private static class IsSpecialVisitor implements Visitor<Boolean> {
+    private static class NumbersVersionComponent extends VersionComponent {
+
+        private final int[] numbers;
+
+        public NumbersVersionComponent(VersionSchema schema, int[] numbers) {
+            super(schema);
+            this.numbers = numbers;
+        }
 
         @Override
-        public Boolean special(SpecialKind kind) {
+        boolean isNumbers() {
             return true;
         }
 
         @Override
-        public Boolean numbers(int[] v) {
+        boolean isSuffix() {
             return false;
         }
 
         @Override
-        public Boolean custom(String s) {
+        boolean isPredecessorSuffix() {
             return false;
         }
-    }
 
-    private static class NextNumbersComponentVariants implements Visitor<List<VersionComponent>> {
-
-        private final int maxDepth;
-        private final int minDepth;
-        private final boolean goesDeeper;
-
-        public NextNumbersComponentVariants(int minDepth, int maxDepth, boolean goesDeeper) {
-            this.maxDepth = maxDepth;
-            this.minDepth = minDepth;
-            this.goesDeeper = goesDeeper;
+        @Override
+        boolean isFinalComponent() {
+            return false;
         }
 
         @Override
-        public List<VersionComponent> special(SpecialKind kind) {
+        int[] getNumbers() {
+            return numbers;
+        }
+
+        @Override
+        String getSuffixString() {
             throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public List<VersionComponent> numbers(int[] v) {
-            List<VersionComponent> result = new ArrayList<VersionComponent>();
-            int reachableDepth = goesDeeper ? maxDepth : Math.min(v.length, maxDepth);
-            for (int depth = minDepth; depth <= reachableDepth; depth++) {
-                for (int i = 0; i < depth; i++) {
-                    int[] variant = Arrays.copyOf(v, depth);
-                    variant[i] = i < v.length ? v[i] + 1 : 1;
-                    for (int j = i + 1; j < depth; j++)
-                        variant[j] = 0;
-                    result.add(VersionComponent.numbers(variant));
-                }
-            }
-            return result;
-        }
-
-        @Override
-        public List<VersionComponent> custom(String s) {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    private static class GetSpecialKindVisitor implements Visitor<SpecialKind> {
-
-        @Override
-        public SpecialKind special(SpecialKind kind) {
-            return kind;
-        }
-
-        @Override
-        public SpecialKind numbers(int[] v) {
-            throw new UnsupportedOperationException("Not special.");
-        }
-
-        @Override
-        public SpecialKind custom(String s) {
-            throw new UnsupportedOperationException("Not special.");
         }
     }
 }

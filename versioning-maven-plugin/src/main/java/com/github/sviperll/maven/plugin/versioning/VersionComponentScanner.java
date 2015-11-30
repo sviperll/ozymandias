@@ -11,21 +11,25 @@ import java.util.Arrays;
  */
 class VersionComponentScanner {
     private static final char[] numberChars = new char[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'};
-    private static final VersionComponentInstance FINAL_INSTANCE = new VersionComponentInstance("", VersionComponent.finalVersion());
-    static VersionComponentScanner createInstance(String string) {
-        return new VersionComponentScanner(string.toCharArray(), 0);
+    static VersionComponentScanner createInstance(VersionSchema schema, String string) {
+        VersionComponentInstance finalComponentInstance = schema.finalVersionComponentInstance("");
+        return new VersionComponentScanner(schema, string.toCharArray(), 0, finalComponentInstance);
     }
+    private final VersionSchema schema;
     private final char[] chars;
     private int position;
+    private final VersionComponentInstance finalComponentInstance;
 
-    VersionComponentScanner(char[] chars, int position) {
+    VersionComponentScanner(VersionSchema schema, char[] chars, int position, VersionComponentInstance finalComponentInstance) {
+        this.schema = schema;
         this.chars = chars;
         this.position = position;
+        this.finalComponentInstance = finalComponentInstance;
     }
 
     VersionComponentInstance getNextComponentInstance() {
         if (position == chars.length)
-            return FINAL_INSTANCE;
+            return finalComponentInstance;
         else {
             String separator = "";
             if (chars[position] == '-') {
@@ -33,7 +37,7 @@ class VersionComponentScanner {
                 position++;
             }
             if (position == chars.length || chars[position] == '-')
-                return new VersionComponentInstance(separator, VersionComponent.finalVersion());
+                return new VersionComponentInstance(separator, finalComponentInstance.component());
             else {
                 if (isNumberChar(chars[position])) {
                     int i = 0;
@@ -55,14 +59,14 @@ class VersionComponentScanner {
                         v = Arrays.copyOf(v, i + 1);
                     v[i] = n;
                     i++;
-                    return new VersionComponentInstance(separator, VersionComponent.numbers(Arrays.copyOf(v, i)));
+                    return schema.numbersComponentInstance(separator, Arrays.copyOf(v, i));
                 } else {
                     StringBuilder builder = new StringBuilder();
                     while (position < chars.length && chars[position] != '-' && !isNumberChar(chars[position])) {
                         builder.append(chars[position]);
                         position++;
                     }
-                    return new VersionComponentInstance(separator, VersionComponent.custom(builder.toString()));
+                    return schema.suffixComponentInstance(separator, builder.toString());
                 }
             }
         }

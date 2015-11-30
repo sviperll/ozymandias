@@ -33,7 +33,7 @@ public class UpdateFileVersioningMojo extends VersioningMojo {
     VersionFile versionFile = new VersionFile();
 
     @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
+    public void executeInitialized() throws MojoExecutionException, MojoFailureException {
         if (versionFile.file == null)
             throw new MojoFailureException(MessageFormat.format("File property should be defined for version file",
                                                                 versionFile.type));

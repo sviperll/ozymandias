@@ -9,22 +9,28 @@ package com.github.sviperll.maven.plugin.versioning;
  */
 class Version implements Comparable<Version> {
 
-    static Version of(VersionComponentInstance... instances) {
+    static Version of(VersionSchema schema, VersionComponentInstance... instances) {
         StringBuilder builder = new StringBuilder();
         for (VersionComponentInstance instance: instances) {
+            if (schema != instance.schema())
+                throw new IllegalStateException("Comparison of version component with different suffix schema");
             builder.append(instance.toString());
         }
-        return new Version(builder.toString());
+        return new Version(schema, builder.toString());
     }
+    private final VersionSchema schema;
     private final String versionString;
-    Version(String versionString) {
+    Version(VersionSchema schema, String versionString) {
+        this.schema = schema;
         this.versionString = versionString;
     }
 
     @Override
     public int compareTo(Version that) {
-        VersionComponentScanner thisScanner = VersionComponentScanner.createInstance(this.versionString);
-        VersionComponentScanner thatScanner = VersionComponentScanner.createInstance(that.versionString);
+        if (this.schema != that.schema)
+            throw new IllegalStateException("Comparison of version component with different suffix schema");
+        VersionComponentScanner thisScanner = VersionComponentScanner.createInstance(schema, this.versionString);
+        VersionComponentScanner thatScanner = VersionComponentScanner.createInstance(schema, that.versionString);
         while (thisScanner.hasMoreComponents() || thatScanner.hasMoreComponents()) {
             VersionComponent thisComponent = thisScanner.getNextComponentInstance().component();
             VersionComponent thatComponent = thatScanner.getNextComponentInstance().component();
@@ -59,6 +65,12 @@ class Version implements Comparable<Version> {
     }
 
     Version extended(VersionComponentInstance extention) {
-        return new Version(versionString + extention.toString());
+        if (extention.component().isSuffix() && this.schema != extention.schema())
+            throw new IllegalStateException("Comparison of version component with different suffix schema");
+        return new Version(schema, versionString + extention.toString());
+    }
+
+    Version simpleExtention() {
+        return extended(schema.numbersComponentInstance("", new int[] {1}));
     }
 }

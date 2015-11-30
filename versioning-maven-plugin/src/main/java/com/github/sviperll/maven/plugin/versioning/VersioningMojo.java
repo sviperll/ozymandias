@@ -16,10 +16,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -37,6 +39,58 @@ abstract class VersioningMojo extends AbstractMojo {
     @Parameter(property = "versioning.version", defaultValue = "${project.version}", required = true)
     String version;
 
+    /*
+     * <suffixes>
+     *     <suffix>
+     *         <variants>a,alpha,Alpha</variants>
+     *     </suffix>
+     *     <suffix>
+     *         <variants>b,beta,Beta</variants>
+     *     </suffix>
+     *     <suffix>
+     *         <description>release candidate</description>
+     *         <variants>rc,RC,CR</variants>
+     *     </suffix>
+     *     <suffix>
+     *         <finalVersion>true</finalVersion>
+     *         <variants>final,Final,GA</variants>
+     *     </suffix>
+     * </suffixes>
+     */
+    @Parameter(required = false)
+    List<Suffix> suffixes = new ArrayList<Suffix>();
+    {
+        Suffix suffix = new Suffix();
+        suffix.variants = "a,alpha,Alpha";
+        suffixes.add(suffix);
+        suffix = new Suffix();
+        suffix.variants = "b,beta,Beta";
+        suffixes.add(suffix);
+        suffix = new Suffix();
+        suffix.variants = "rc,RC,CR";
+        suffix.description = "release candidate";
+        suffixes.add(suffix);
+    }
+
+    /*
+     *     <finalVersionSuffix>
+     *         <variants>final,Final,GA</variants>
+     *     </finalVersionSuffix>
+     */
+    @Parameter(required = false)
+    Suffix finalVersionSuffix = new Suffix();
+    {
+        finalVersionSuffix.variants = "final,Final,GA";
+    }
+
+    /*
+     * <versionOrder>alpha,beta,rc</versionOrder>
+     * or
+     * <versionOrder>Alpha,Beta,CR,GA</versionOrder>
+     */
+    @Parameter(property = "versioning.order", required = false)
+    String versionOrder = "alpha,beta,rc";
+
     @Component
     Prompter prompter;
 
@@ -52,25 +106,55 @@ abstract class VersioningMojo extends AbstractMojo {
     @Parameter(required = true, property = "session", readonly = true)
     MavenSession session;
 
+    VersionSchema versionSchema;
+
+    @Override
+    public final void execute() throws MojoExecutionException, MojoFailureException {
+        init();
+        executeInitialized();
+    }
+
+    protected void init() throws MojoExecutionException, MojoFailureException {
+        VersionSchema.Builder builder = new VersionSchema.Builder();
+        for (Suffix suffixConfiguration: suffixes) {
+            VersionSchema.Suffix suffix = builder.createSuffix();
+            String[] variants = suffixConfiguration.variants.split(",", -1);
+            for (String variant: variants) {
+                suffix.addVariant(variant);
+            }
+            if (suffixConfiguration.description != null)
+                suffix.setDescription(suffixConfiguration.description);
+        }
+        Suffix finalConfiguration = finalVersionSuffix;
+        VersionSchema.Suffix finalSuffix = builder.getFinalSuffix();
+        String[] variants = finalConfiguration.variants.split(",", -1);
+        for (String variant: variants) {
+            finalSuffix.addVariant(variant);
+        }
+        if (finalConfiguration.description != null)
+            finalSuffix.setDescription(finalConfiguration.description);
+        String[] inOrderSuffixes = versionOrder.split(",", -1);
+        for (int i = 0; i < inOrderSuffixes.length; i++) {
+            String suffixString = inOrderSuffixes[i];
+            builder.setCanonicalSuffixString(suffixString);
+            builder.setSuffixIndex(suffixString, i - inOrderSuffixes.length - 1);
+        }
+        builder.setSuffixIndex("SNAPSHOT", -1);
+        versionSchema = builder.build();
+    }
+
+    abstract protected void executeInitialized() throws MojoExecutionException, MojoFailureException;
+
     String versionKind(String versionString) {
-        VersionComponentScanner scanner = VersionComponentScanner.createInstance(versionString);
+        VersionComponentScanner scanner = versionSchema.createScanner(versionString);
         scanner.getNextComponentInstance();
         VersionComponent selectedSuffix = scanner.getNextComponentInstance().component();
-        if (selectedSuffix.isFinal() && !scanner.hasMoreComponents())
+        if (selectedSuffix.isFinalComponent() && !scanner.hasMoreComponents())
             return "final";
-        else if (!selectedSuffix.isSpecial()) {
+        else if (selectedSuffix.isNumbers() || !selectedSuffix.isPredecessorSuffix())
             return "other";
-        } else {
-            VersionComponent.SpecialKind kind = selectedSuffix.specialKind();
-            if (kind == VersionComponent.SpecialKind.ALPHA)
-                return "alpha";
-            else if (kind == VersionComponent.SpecialKind.BETA)
-                return "beta";
-            else if (kind == VersionComponent.SpecialKind.RC)
-                return "rc";
-            else
-                return "other";
-        }
+        else
+            return selectedSuffix.getCanonicalSuffixString();
     }
 
     String prompt(String message) throws MojoExecutionException {
@@ -184,4 +268,5 @@ abstract class VersioningMojo extends AbstractMojo {
             }
         }
     }
+
 }
