@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.github.sviperll</groupId>
         <artifactId>ozymandias</artifactId>
-        <version>0.22</version>
+        <version>0.22-successor-SNAPSHOT</version>
     </parent>
     <groupId>com.github.sviperll</groupId>
     <artifactId>mustache-maven-plugin</artifactId>
