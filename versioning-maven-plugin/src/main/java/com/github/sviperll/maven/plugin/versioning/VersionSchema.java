@@ -29,27 +29,28 @@
  */
 package com.github.sviperll.maven.plugin.versioning;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  *
  * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 public class VersionSchema {
-    private final Builder suffixMap;
-    private VersionSchema(Builder suffixMap) {
+    private final SuffixMap suffixMap;
+    private VersionSchema(SuffixMap suffixMap) {
         this.suffixMap = suffixMap;
     }
     
     boolean isPredecessorSuffix(String suffix) {
         Suffix suffixObject = suffixMap.getSuffix(suffix);
-        return suffixObject.getOrderIndex() < 0;
+        return suffixObject.orderIndex() < 0;
     }
 
     boolean isFinalSuffix(String suffix) {
@@ -60,27 +61,26 @@ public class VersionSchema {
     int compareSuffixes(String suffix1, String suffix2) {
         Suffix suffixObject1 = suffixMap.getSuffix(suffix1);
         Suffix suffixObject2 = suffixMap.getSuffix(suffix2);
-        int index1 = suffixObject1.getOrderIndex();
-        int index2 = suffixObject2.getOrderIndex();
+        int index1 = suffixObject1.orderIndex();
+        int index2 = suffixObject2.orderIndex();
         int result = index1 < index2 ? -1 : (index1 == index2 ? 0 : 1);
         if (result != 0)
             return result;
         else {
-            String canonical1 = getCanonicalSuffix(suffix1);
-            String canonical2 = getCanonicalSuffix(suffix2);
+            String canonical1 = suffixObject1.canonicalString();
+            String canonical2 = suffixObject2.canonicalString();
             return canonical1.compareTo(canonical2);
         }
     }
 
     String getCanonicalSuffix(String suffix) {
         Suffix suffixObject = suffixMap.getSuffix(suffix);
-        String canonicalString = suffixObject.getCanonicalString();
-        return canonicalString == null ? suffix : canonicalString;
+        return suffixObject.canonicalString();
     }
 
     String getCanonicalFinalSuffix() {
         Suffix suffixObject = suffixMap.getFinalSuffix();
-        return suffixObject.getCanonicalString();
+        return suffixObject.canonicalString();
     }
 
     VersionComponent finalVersionComponent() {
@@ -122,13 +122,13 @@ public class VersionSchema {
     String[] getPredecessorSuffixes() {
         SortedMap<Integer, Suffix> map = new TreeMap<Integer, Suffix>();
         for (Suffix suffix: suffixMap.suffixes()) {
-            if (suffix.getOrderIndex() < 0)
-                map.put(suffix.getOrderIndex(), suffix);
+            if (suffix.orderIndex() < 0)
+                map.put(suffix.orderIndex(), suffix);
         }
         String[] result = new String[map.size()];
         int i = 0;
         for (Map.Entry<Integer, Suffix> entry: map.entrySet()) {
-            result[i] = entry.getValue().getCanonicalString();
+            result[i] = entry.getValue().canonicalString();
             i++;
         }
         return result;
@@ -136,132 +136,236 @@ public class VersionSchema {
 
     String getSuffixDescription(String suffix) {
         Suffix suffixObject = suffixMap.getSuffix(suffix);
-        return suffixObject.getDescription();
+        return suffixObject.description();
     }
 
     String getNonEmptyFinalSuffix() {
-        Suffix finalSuffix = suffixMap.getFinalSuffix();
-        String canonicalSuffix = finalSuffix.getCanonicalString();
-        if (!canonicalSuffix.equals(""))
-            return canonicalSuffix;
-        else {
-            for (String suffix: finalSuffix.getVariants())
-                if (!suffix.equals(""))
-                    return suffix;
-            throw new IllegalStateException("No non empty variant for final version suffixes");
-        }
+        return suffixMap.nonEmptyFinalSuffixString();
     }
 
     String[] getSuffixVariants(String suffix) {
         Suffix suffixObject = suffixMap.getSuffix(suffix);
-        List<String> variants = suffixObject.getVariants();
+        Set<String> variants = suffixObject.variants();
         return variants.toArray(new String[variants.size()]);
     }
-    static class Builder {
-        private final Set<VersionSchema.Suffix> suffixes = new HashSet<VersionSchema.Suffix>();
-        private final Map<String, VersionSchema.Suffix> suffixMap = new TreeMap<String, VersionSchema.Suffix>();
-        private final VersionSchema.Suffix defaultSuffix = new Suffix(this);
-        private final VersionSchema.Suffix finalSuffix = new Suffix(this);
-        {
-            finalSuffix.isFinalVersion = true;
-            finalSuffix.addVariant("");
-            finalSuffix.canonicalString = "";
+
+    private static class SuffixMap {
+        private final Map<String, Suffix> map;
+        private final Set<Suffix> suffixes;
+        private final FinalSuffix finalSuffix;
+
+        private SuffixMap(Map<String, Suffix> map, Set<Suffix> suffixes, FinalSuffix finalSuffix) {
+            this.map = map;
+            this.suffixes = suffixes;
+            this.finalSuffix = finalSuffix;
         }
 
-        private Suffix getSuffix(String suffixString) {
-            Suffix result = suffixMap.get(suffixString);
-            return result != null ? result : defaultSuffix;
+        Suffix getSuffix(String suffixString) {
+            if (suffixString.isEmpty())
+                return finalSuffix.suffix();
+            else {
+                Suffix suffix = map.get(suffixString);
+                if (suffix != null)
+                    return suffix;
+                else {
+                    SuffixVariants variants = new SuffixVariants(Collections.singleton(suffixString), suffixString);
+                    Suffix defaultSuffix = new Suffix(1, null, variants);
+                    return defaultSuffix;
+                }
+            }
         }
-        
-        Set<VersionSchema.Suffix> suffixes() {
+
+        public Suffix getFinalSuffix() {
+            return finalSuffix.suffix();
+        }
+
+        public Iterable<Suffix> suffixes() {
             return suffixes;
         }
 
-        VersionSchema.Suffix createSuffix() {
-            VersionSchema.Suffix result = new VersionSchema.Suffix(this);
-            suffixes.add(result);
-            return result;
+        public String nonEmptyFinalSuffixString() {
+            return finalSuffix.nonEmptyCanocicalString();
+        }
+    }
+
+    private static class Suffix {
+        private final int orderIndex;
+        private final String description;
+        private final SuffixVariants variants;
+        private Suffix(int orderIndex, String description, SuffixVariants variants) {
+            this.orderIndex = orderIndex;
+            this.description = description;
+            this.variants = variants;
         }
 
-        void setCanonicalSuffixString(String suffixString) {
-            VersionSchema.Suffix suffix = suffixMap.get(suffixString);
-            if (suffix == null) {
-                suffix = new Suffix(this);
-                suffix.addVariant(suffixString);
-            }
-            suffix.setCanonicalString(suffixString);
+        private int orderIndex() {
+            return orderIndex;
         }
 
-        void setSuffixIndex(String suffixString, int i) {
-            VersionSchema.Suffix suffix = suffixMap.get(suffixString);
-            if (suffix == null) {
-                suffix = new Suffix(this);
-                suffix.addVariant(suffixString);
+        private boolean isFinalVersion() {
+            return orderIndex == 0;
+        }
+
+        private String canonicalString() {
+            return variants.canonical();
+        }
+
+        private String description() {
+            return description;
+        }
+
+        private Set<String> variants() {
+            return variants.set();
+        }
+    }
+
+    private static class FinalSuffix {
+        private final Suffix suffix;
+        private final String nonEmptyCanonicalString;
+
+        private FinalSuffix(Suffix suffix, String nonEmptyCanonicalString) {
+            this.suffix = suffix;
+            this.nonEmptyCanonicalString = nonEmptyCanonicalString;
+        }
+
+        Suffix suffix() {
+            return suffix;
+        }
+
+        String nonEmptyCanocicalString() {
+            return nonEmptyCanonicalString;
+        }
+    }
+
+    private static class SuffixVariants {
+        private final Set<String> set;
+        private final String canonical;
+        private SuffixVariants(Set<String> set, String canonical) {
+            this.set = set;
+            this.canonical = canonical;
+        }
+
+        private Set<String> set() {
+            return set;
+        }
+
+        private String canonical() {
+            return canonical;
+        }
+    }
+
+    static class Builder {
+        private final Map<String, VersionSchema.SuffixBuilder> suffixBuilderMap = new TreeMap<String, VersionSchema.SuffixBuilder>();
+        private final VersionSchema.SuffixBuilder finalSuffixBuilder = new SuffixBuilder(this);
+        private boolean useNonEmptyFinalSuffix = false;
+
+        SuffixBuilder getSuffixBuilder(String suffixString) {
+            SuffixBuilder builder = suffixBuilderMap.get(suffixString);
+            if (builder == null) {
+                builder = new VersionSchema.SuffixBuilder(this);
+                builder.addVariant(suffixString);
             }
-            suffix.setOrderingIndex(i);
+            return builder;
+        }
+
+        private void putSuffixBuilder(String variant, SuffixBuilder suffix) {
+            suffixBuilderMap.put(variant, suffix);
+        }
+
+        SuffixBuilder getFinalSuffixBuilder() {
+            return finalSuffixBuilder;
+        }
+
+        void setUseNonEmptyFinalSuffix(boolean useNonEmptyFinalSuffix) {
+            this.useNonEmptyFinalSuffix = useNonEmptyFinalSuffix;
         }
 
         VersionSchema build() {
-            return new VersionSchema(this);
-        }
+            Set<SuffixBuilder> builders = new HashSet<SuffixBuilder>();
+            builders.addAll(suffixBuilderMap.values());
 
-        private void putSuffix(String variant, Suffix suffix) {
-            if (suffixMap.containsKey(variant))
-                throw new IllegalStateException("Redefinition of suffix with " + variant + " variant");
-            suffixMap.put(variant, suffix);
-        }
+            SortedSet<Integer> predecessorIndexes = new TreeSet<Integer>();
+            SortedSet<Integer> successorIndexes = new TreeSet<Integer>();
+            for (SuffixBuilder builder: builders) {
+                if (builder.isPredecessor) {
+                    predecessorIndexes.add(builder.index);
+                } else {
+                    successorIndexes.add(builder.index);
+                }
+            }
 
-        Suffix getFinalSuffix() {
-            return finalSuffix;
+            Set<Suffix> set = new HashSet<Suffix>();
+            Map<String, Suffix> map = new TreeMap<String, Suffix>();
+
+            for (SuffixBuilder builder: builders) {
+                if (!builder.isFinalVersion()) {
+                    int index;
+                    if (builder.isPredecessor)
+                        index = builder.index - predecessorIndexes.last() - 1;
+                    else
+                        index = builder.index - successorIndexes.first() + 1;
+                    Set<String> variants = new TreeSet<String>();
+                    variants.addAll(builder.variants);
+                    SuffixVariants suffixVariants = new SuffixVariants(Collections.unmodifiableSet(variants), builder.canonicalString);
+                    Suffix suffix = new Suffix(index, builder.description, suffixVariants);
+                    set.add(suffix);
+                    for (String suffixString: variants)
+                        map.put(suffixString, suffix);
+                }
+            }
+
+            Set<String> variants = new TreeSet<String>();
+            variants.addAll(finalSuffixBuilder.variants);
+            String canonicalString = useNonEmptyFinalSuffix ? finalSuffixBuilder.canonicalString : "";
+            SuffixVariants suffixVariants = new SuffixVariants(Collections.unmodifiableSet(variants), canonicalString);
+            Suffix suffix = new Suffix(0, finalSuffixBuilder.description, suffixVariants);
+            FinalSuffix finalSuffix = new FinalSuffix(suffix, finalSuffixBuilder.canonicalString);
+            set.add(suffix);
+            for (String suffixString: variants)
+                map.put(suffixString, suffix);
+
+            SuffixMap suffixMap = new SuffixMap(Collections.unmodifiableMap(map), Collections.unmodifiableSet(set), finalSuffix);
+            return new VersionSchema(suffixMap);
         }
     }
-    static class Suffix {
+
+    static class SuffixBuilder {
         String canonicalString = null;
         String description = null;
-        private boolean isFinalVersion = false;
-        private int index = 1;
+        private int index = 0;
+        private boolean isPredecessor = false;
         private final Builder builder;
-        List<String> variants = new ArrayList<String>();
+        Set<String> variants = new TreeSet<String>();
 
-        private Suffix(Builder builder) {
+        private SuffixBuilder(Builder builder) {
             this.builder = builder;
         }
 
         void addVariant(String variant) {
-            builder.putSuffix(variant, this);
+            builder.putSuffixBuilder(variant, this);
             variants.add(variant);
+            if (canonicalString == null)
+                canonicalString = variant;
         }
 
         void setDescription(String description) {
             this.description = description;
         }
 
-        private void setCanonicalString(String suffixString) {
+        void setCanonicalString(String suffixString) {
             canonicalString = suffixString;
         }
 
-        private void setOrderingIndex(int index) {
+        void setOrderingIndex(int index) {
             this.index = index;
         }
 
-        private int getOrderIndex() {
-            return isFinalVersion ? 0 : index;
+        void setPredecessor(boolean isPredecessor) {
+            this.isPredecessor = isPredecessor;
         }
 
-        private boolean isFinalVersion() {
-            return isFinalVersion;
-        }
-
-        private String getCanonicalString() {
-            return canonicalString != null ? canonicalString : (isFinalVersion ? "" : null);
-        }
-
-        private String getDescription() {
-            return description;
-        }
-
-        private List<String> getVariants() {
-            return variants;
+        boolean isFinalVersion() {
+            return this == builder.getFinalSuffixBuilder();
         }
     }
 }

@@ -29,6 +29,7 @@
  */
 package com.github.sviperll.maven.plugin.versioning;
 
+import edu.emory.mathcs.backport.java.util.Arrays;
 import java.util.ArrayList;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -47,11 +48,17 @@ public class VersionSchemaTest {
         VersionSchema schema = createTestSchema();
         assertEquals("", schema.getCanonicalFinalSuffix());
         assertEquals("final", schema.getNonEmptyFinalSuffix());
-        
+
         assertEquals("", schema.finalVersionComponent().getSuffixString());
         assertTrue(schema.finalVersionComponent().isFinalComponent());
         assertFalse(schema.finalVersionComponent().allowsMoreComponents());
-        
+        assertArrayEqualsWhenSorted(new String[] {"Final", "GA", "final"}, schema.getSuffixVariants(""));
+        assertArrayEqualsWhenSorted(new String[] {"Final", "GA", "final"}, schema.getSuffixVariants("final"));
+    }
+
+    @Test
+    public void testComparisons() {
+        VersionSchema schema = createTestSchema();
         assertTrue(schema.version("1.0-alpha1").compareTo(schema.version("1.0-alpha1")) == 0);
         assertTrue(schema.version("1.0-alpha1").compareTo(schema.version("1.0-alpha2")) < 0);
         assertTrue(schema.version("1.0-alpha2").compareTo(schema.version("1.0-alpha1")) > 0);
@@ -73,7 +80,6 @@ public class VersionSchemaTest {
         assertTrue(schema.compareSuffixes("beta", "Beta") == 0);
         assertTrue(candidate.compareTo(base) >= 0);
     }
-    
 
     @Test
     public void testCompareSuffixes() {
@@ -90,30 +96,43 @@ public class VersionSchemaTest {
 
     private VersionSchema createTestSchema() {
         VersionSchema.Builder builder = new VersionSchema.Builder();
-        VersionSchema.Suffix suffix = builder.createSuffix();
+
+        VersionSchema.SuffixBuilder suffix = builder.getSuffixBuilder("Alpha");
         suffix.addVariant("a");
         suffix.addVariant("alpha");
-        suffix.addVariant("Alpha");
-        suffix = builder.createSuffix();
+        suffix.setCanonicalString("alpha");
+        suffix.setPredecessor(true);
+        suffix.setOrderingIndex(1);
+
+        suffix = builder.getSuffixBuilder("Beta");
         suffix.addVariant("b");
         suffix.addVariant("beta");
-        suffix.addVariant("Beta");
-        suffix = builder.createSuffix();
-        suffix.addVariant("rc");
-        suffix.addVariant("CR");
+        suffix.setCanonicalString("beta");
+        suffix.setPredecessor(true);
+        suffix.setOrderingIndex(2);
+
+        suffix = builder.getSuffixBuilder("CR");
         suffix.addVariant("RC");
-        suffix = builder.getFinalSuffix();
+        suffix.addVariant("rc");
+        suffix.setCanonicalString("rc");
+        suffix.setPredecessor(true);
+        suffix.setOrderingIndex(4);
+
+        suffix = builder.getSuffixBuilder("SNAPSHOT");
+        suffix.setPredecessor(true);
+        suffix.setOrderingIndex(5);
+
+        suffix = builder.getFinalSuffixBuilder();
         suffix.addVariant("final");
         suffix.addVariant("Final");
         suffix.addVariant("GA");
-        
-        builder.setCanonicalSuffixString("alpha");
-        builder.setCanonicalSuffixString("beta");
-        builder.setCanonicalSuffixString("rc");
-        builder.setSuffixIndex("alpha", -4);
-        builder.setSuffixIndex("beta", -3);
-        builder.setSuffixIndex("rc", -2);
-        builder.setSuffixIndex("SNAPSHOT", -1);
+
         return builder.build();
+    }
+
+    private void assertArrayEqualsWhenSorted(String[] expected, String[] actual) {
+        Arrays.sort(expected);
+        Arrays.sort(actual);
+        assertArrayEquals(expected, actual);
     }
 }

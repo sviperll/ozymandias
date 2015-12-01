@@ -117,29 +117,47 @@ abstract class VersioningMojo extends AbstractMojo {
     protected void init() throws MojoExecutionException, MojoFailureException {
         VersionSchema.Builder builder = new VersionSchema.Builder();
         for (Suffix suffixConfiguration: suffixes) {
-            VersionSchema.Suffix suffix = builder.createSuffix();
             String[] variants = suffixConfiguration.variants.split(",", -1);
-            for (String variant: variants) {
-                suffix.addVariant(variant);
+            if (variants.length > 0) {
+                VersionSchema.SuffixBuilder suffix = builder.getSuffixBuilder(variants[0].trim());
+                for (String variant: variants) {
+                    suffix.addVariant(variant.trim());
+                }
+                if (suffixConfiguration.description != null)
+                    suffix.setDescription(suffixConfiguration.description);
             }
-            if (suffixConfiguration.description != null)
-                suffix.setDescription(suffixConfiguration.description);
         }
         Suffix finalConfiguration = finalVersionSuffix;
-        VersionSchema.Suffix finalSuffix = builder.getFinalSuffix();
+        VersionSchema.SuffixBuilder finalSuffix = builder.getFinalSuffixBuilder();
         String[] variants = finalConfiguration.variants.split(",", -1);
         for (String variant: variants) {
-            finalSuffix.addVariant(variant);
+            finalSuffix.addVariant(variant.trim());
         }
         if (finalConfiguration.description != null)
             finalSuffix.setDescription(finalConfiguration.description);
         String[] inOrderSuffixes = versionOrder.split(",", -1);
         for (int i = 0; i < inOrderSuffixes.length; i++) {
-            String suffixString = inOrderSuffixes[i];
-            builder.setCanonicalSuffixString(suffixString);
-            builder.setSuffixIndex(suffixString, i - inOrderSuffixes.length - 1);
+            String suffixString = inOrderSuffixes[i].trim();
+            VersionSchema.SuffixBuilder suffixBuilder = builder.getSuffixBuilder(suffixString);
+            if (!suffixBuilder.isFinalVersion()) {
+                suffixBuilder.setCanonicalString(suffixString);
+                suffixBuilder.setPredecessor(true);
+                suffixBuilder.setOrderingIndex(i);
+            } else {
+                if (i != inOrderSuffixes.length - 1)
+                    throw new MojoExecutionException("Final version suffix can only be used as a last element of version order list");
+                else {
+                    suffixBuilder.setCanonicalString(suffixString);
+                    builder.setUseNonEmptyFinalSuffix(false);
+                }
+            }
         }
-        builder.setSuffixIndex("SNAPSHOT", -1);
+
+        // SNAPSHOT suffix is special and always present
+        VersionSchema.SuffixBuilder suffixBuilder = builder.getSuffixBuilder("SNAPSHOT");
+        suffixBuilder.setPredecessor(true);
+        suffixBuilder.setOrderingIndex(inOrderSuffixes.length);
+
         versionSchema = builder.build();
     }
 

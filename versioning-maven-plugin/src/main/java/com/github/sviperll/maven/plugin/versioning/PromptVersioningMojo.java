@@ -103,8 +103,11 @@ public class PromptVersioningMojo extends VersioningMojo {
         StringBuilder prompt = new StringBuilder();
         prompt.append("Select version kind: ");
         for (String suffix: predecessorSuffixes) {
-            prompt.append(suffixDescription(suffix)).append(", ");
-            options.addAll(Arrays.asList(versionSchema.getSuffixVariants(suffix)));
+            // Skip SNAPSHOT suffix as something special for maven only
+            if (!suffix.equals("SNAPSHOT")) {
+                prompt.append(suffixDescription(suffix)).append(", ");
+                options.addAll(Arrays.asList(versionSchema.getSuffixVariants(suffix)));
+            }
         }
 
         String finalSuffix = versionSchema.getNonEmptyFinalSuffix();
