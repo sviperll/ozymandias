@@ -148,7 +148,7 @@ abstract class VersioningMojo extends AbstractMojo {
                     throw new MojoExecutionException("Final version suffix can only be used as a last element of version order list");
                 else {
                     suffixBuilder.setCanonicalString(suffixString);
-                    builder.setUseNonEmptyFinalSuffix(false);
+                    builder.setUseNonEmptyFinalSuffix(true);
                 }
             }
         }
