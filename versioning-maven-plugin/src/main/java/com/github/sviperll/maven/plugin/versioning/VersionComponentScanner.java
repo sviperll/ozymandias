@@ -10,7 +10,7 @@ import java.util.Arrays;
  * @author Victor Nazarov &lt;asviraspossible@gmail.com&gt;
  */
 class VersionComponentScanner {
-    private static final char[] numberChars = new char[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'};
+    private static final char[] numberChars = new char[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
     static VersionComponentScanner createInstance(VersionSchema schema, String string) {
         VersionComponentInstance finalComponentInstance = schema.finalVersionComponentInstance("");
         return new VersionComponentScanner(schema, string.toCharArray(), 0, finalComponentInstance);
@@ -32,11 +32,11 @@ class VersionComponentScanner {
             return finalComponentInstance;
         else {
             String separator = "";
-            if (chars[position] == '-') {
-                separator = "-";
+            if (chars[position] == '-' || chars[position] == '.') {
+                separator = String.valueOf(chars[position]);
                 position++;
             }
-            if (position == chars.length || chars[position] == '-')
+            if (position == chars.length || chars[position] == '-' || chars[position] == '.')
                 return new VersionComponentInstance(separator, finalComponentInstance.component());
             else {
                 if (isNumberChar(chars[position])) {
@@ -44,25 +44,22 @@ class VersionComponentScanner {
                     int n = 0;
                     int[] v = new int[10];
                     while (position < chars.length && isNumberChar(chars[position])) {
-                        if (chars[position] == '.') {
-                            while (i >= v.length)
-                                v = Arrays.copyOf(v, v.length + v.length / 2);
-                            v[i] = n;
-                            i++;
-                            n = 0;
-                        } else {
+                        while (position < chars.length && isNumberChar(chars[position])) {
                             n = n * 10 + numberCharIndex(chars[position]);
+                            position++;
                         }
-                        position++;
+                        if (i >= v.length)
+                            v = Arrays.copyOf(v, i + i / 2);
+                        v[i] = n;
+                        i++;
+                        n = 0;
+                        if (position < chars.length - 1 && chars[position] == '.' && isNumberChar(chars[position+1]))
+                            position++;
                     }
-                    if (i >= v.length)
-                        v = Arrays.copyOf(v, i + 1);
-                    v[i] = n;
-                    i++;
                     return schema.numbersComponentInstance(separator, Arrays.copyOf(v, i));
                 } else {
                     StringBuilder builder = new StringBuilder();
-                    while (position < chars.length && chars[position] != '-' && !isNumberChar(chars[position])) {
+                    while (position < chars.length && chars[position] != '-' && chars[position] != '.' && !isNumberChar(chars[position])) {
                         builder.append(chars[position]);
                         position++;
                     }
