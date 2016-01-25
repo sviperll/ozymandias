@@ -105,10 +105,10 @@ With the above configuration `prompt` goal execution
 Different set of suffixes
 -------------------------
 
-You customize used suffixes and use your own custom suffixes instead of `alpha`, `beta` and `rc`
+You can customize used suffixes and use your own custom suffixes instead of `alpha`, `beta` and `rc`
 
 In the simpliest case you can add `versionOrder` directive into plugin configuration.
-You can use `Alpha`, `Beta` and `CR` suffixes instead of `alpha`, `beta` and `rc` like this.
+For example, you can use `Alpha`, `Beta` and `CR` suffixes instead of `alpha`, `beta` and `rc` like this:
 
 ````xml
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -123,7 +123,7 @@ You can use `Alpha`, `Beta` and `CR` suffixes instead of `alpha`, `beta` and `rc
                 <artifactId>versioning-maven-plugin</artifactId>
                 <configuration>
                     ...
-                    <versionOrder>alpha,beta,rc</versionOrder>
+                    <versionOrder>Alpha,Beta,CR</versionOrder>
                     ...
                 </configuration>
             </plugin>
@@ -136,7 +136,7 @@ You can use `Alpha`, `Beta` and `CR` suffixes instead of `alpha`, `beta` and `rc
 ````
 
 With `versionOrder` directive you can also configure wheather final version should have some suffix at the end
-or it should be bare suffixless version string.
+(like `5.0.3-Final`) or it should be bare suffixless version string (like `5.0.3`).
 To add suffix to final version, you can just list it as a last component of `versionOrder` directive:
 
 ````xml
