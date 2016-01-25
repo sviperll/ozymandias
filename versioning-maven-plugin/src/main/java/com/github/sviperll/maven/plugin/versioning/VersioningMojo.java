@@ -51,10 +51,6 @@ abstract class VersioningMojo extends AbstractMojo {
      *         <description>release candidate</description>
      *         <variants>rc,RC,CR</variants>
      *     </suffix>
-     *     <suffix>
-     *         <finalVersion>true</finalVersion>
-     *         <variants>final,Final,GA</variants>
-     *     </suffix>
      * </suffixes>
      */
     @Parameter(required = false)
