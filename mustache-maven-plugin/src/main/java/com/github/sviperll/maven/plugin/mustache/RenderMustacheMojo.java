@@ -5,6 +5,7 @@ package com.github.sviperll.maven.plugin.mustache;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.MessageFormat;
@@ -25,7 +26,8 @@ public class RenderMustacheMojo extends ConfiguredMustacheMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             Charset charset = Charset.forName(encoding);
-            MustacheLoader mustacheReader = new MustacheLoader(new DefaultMustacheFactory(), getLog());
+            MustacheFactory mustacheFactory = new DefaultMustacheFactory();
+            MustacheLoader mustacheReader = new MustacheLoader(mustacheFactory, getLog());
             if (contexts != null) {
                 for (Context contextConfig: contexts) {
                     Object contextObject = loadContext(contextConfig);
