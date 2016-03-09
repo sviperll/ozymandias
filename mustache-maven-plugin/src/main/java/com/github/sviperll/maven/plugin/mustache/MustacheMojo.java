@@ -46,6 +46,9 @@ abstract class MustacheMojo extends AbstractMojo {
     }
 
     void renderMustache(Mustache mustache, Object context, File outputFile, Charset charset) throws FileNotFoundException {
+        File outputDirectory = outputFile.getParentFile();
+        if (outputDirectory != null)
+            outputDirectory.mkdirs();
         FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
         try {
             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
@@ -127,6 +130,4 @@ abstract class MustacheMojo extends AbstractMojo {
             }
         }
     }
-
-
 }
