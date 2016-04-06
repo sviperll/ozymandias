@@ -45,10 +45,13 @@ abstract class MustacheMojo extends AbstractMojo {
         return jsonLoader.load(contextFile, charset);
     }
 
-    void renderMustache(Mustache mustache, Object context, File outputFile, Charset charset) throws FileNotFoundException {
-        File outputDirectory = outputFile.getParentFile();
-        if (outputDirectory != null)
-            outputDirectory.mkdirs();
+    void renderMustache(Mustache mustache, Object context, File outputFile, Charset charset) throws IOException {
+        File outputDirectory = outputFile.getCanonicalFile().getParentFile();
+        if (outputDirectory != null && !outputDirectory.exists()) {
+            boolean success = outputDirectory.mkdirs();
+            if (!success)
+                throw new FileNotFoundException("Unable to create directory: " + outputDirectory);
+        }
         FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
         try {
             BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream);
@@ -62,28 +65,36 @@ abstract class MustacheMojo extends AbstractMojo {
                     } finally {
                         try {
                             bufferedWriter.close();
-                        } catch (Exception ex) {
+                        } catch (IOException ex) {
+                            getLog().error("Unable to close bufferedWriter", ex);
+                        } catch (RuntimeException ex) {
                             getLog().error("Unable to close bufferedWriter", ex);
                         }
                     }
                 } finally {
                     try {
                         outputStreamWriter.close();
-                    } catch (Exception ex) {
+                    } catch (IOException ex) {
+                        getLog().error("Unable to close outputStreamWriter", ex);
+                    } catch (RuntimeException ex) {
                         getLog().error("Unable to close outputStreamWriter", ex);
                     }
                 }
             } finally {
                 try {
                     bufferedOutputStream.close();
-                } catch (Exception ex) {
+                } catch (IOException ex) {
+                    getLog().error("Unable to close bufferedOutputStream", ex);
+                } catch (RuntimeException ex) {
                     getLog().error("Unable to close bufferedOutputStream", ex);
                 }
             }
         } finally {
             try {
                 fileOutputStream.close();
-            } catch (Exception ex) {
+            } catch (IOException ex) {
+                getLog().error("Unable to close fileOutputStream", ex);
+            } catch (RuntimeException ex) {
                 getLog().error("Unable to close fileOutputStream", ex);
             }
         }
@@ -104,28 +115,36 @@ abstract class MustacheMojo extends AbstractMojo {
                     } finally {
                         try {
                             bufferedReader.close();
-                        } catch (Exception ex) {
+                        } catch (IOException ex) {
+                            getLog().error("Error closing bufferedReader", ex);
+                        } catch (RuntimeException ex) {
                             getLog().error("Error closing bufferedReader", ex);
                         }
                     }
                 } finally {
                     try {
                         inputStreamReader.close();
-                    } catch (Exception ex) {
+                    } catch (IOException ex) {
+                        getLog().error("Error closing inputStreamReader", ex);
+                    } catch (RuntimeException ex) {
                         getLog().error("Error closing inputStreamReader", ex);
                     }
                 }
             } finally {
                 try {
                     bufferedInputStream.close();
-                } catch (Exception ex) {
+                } catch (IOException ex) {
+                    getLog().error("Error closing bufferedInputStream", ex);
+                } catch (RuntimeException ex) {
                     getLog().error("Error closing bufferedInputStream", ex);
                 }
             }
         } finally {
             try {
                 fileInputStream.close();
-            } catch (Exception ex) {
+            } catch (IOException ex) {
+                getLog().error("Error closing fileInputStream", ex);
+            } catch (RuntimeException ex) {
                 getLog().error("Error closing fileInputStream", ex);
             }
         }
