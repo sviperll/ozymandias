@@ -15,7 +15,7 @@
     <properties>
         <version.maven>2.2.1</version.maven>
         <version.maven.plugin>3.4</version.maven.plugin>
-        <version.jackson>2.6.0-rc4</version.jackson>
+        <version.jackson>2.9.7</version.jackson>
     </properties>
 
     <dependencies>
@@ -100,32 +100,6 @@
             <version>${version.maven.plugin}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- plexus -->
-        <!--
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-component-annotations</artifactId>
-            <version>1.6</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-interactivity-api</artifactId>
-            <version>1.0-alpha-4</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>plexus</groupId>
-                    <artifactId>plexus-utils</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-utils</artifactId>
-            <version>3.0.20</version>
-        </dependency>
-        -->
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
