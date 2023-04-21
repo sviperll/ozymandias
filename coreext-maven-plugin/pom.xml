@@ -14,7 +14,7 @@
 
     <properties>
         <version.maven>2.2.1</version.maven>
-        <version.maven.plugin>3.4</version.maven.plugin>
+        <version.maven.plugin>3.8.1</version.maven.plugin>
     </properties>
 
     <prerequisites>
@@ -164,7 +164,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>${version.maven.plugin}</version>
                 <configuration>
                     <goalPrefix>coreext</goalPrefix>
                     <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>

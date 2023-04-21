@@ -12,9 +12,7 @@ import java.util.List;
  *
  * @author vir
  */
-public class Tree<T> implements Serializable {
-    private static final long serialVersionUID = 1L;
-
+public class Tree<T> {
     private final T value;
     private final List<Tree<T>> children;
 

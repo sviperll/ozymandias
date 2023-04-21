@@ -8,14 +8,14 @@
     <description>Collection of maven extensions, plugins and generally usefull artifacts</description>
     <url>https://github.com/sviperll/ozymandias</url>
     <properties>
-        <ozymandias.version>0.23-rc1-successor-SNAPSHOT</ozymandias.version>
+        <ozymandias.version>0.24-beta1-SNAPSHOT</ozymandias.version>
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
         <maven-resources-plugin.version>3.1.0</maven-resources-plugin.version>
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
         <maven-site-plugin.version>3.7.1</maven-site-plugin.version>
-        <java.version>1.8</java.version>
+        <java.version>11</java.version>
         <netbeans.hint.license>BSD3</netbeans.hint.license>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
